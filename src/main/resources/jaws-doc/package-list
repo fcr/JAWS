@@ -1,0 +1,4 @@
+edu.smu.tspell.wordnet
+edu.smu.tspell.wordnet.impl
+edu.smu.tspell.wordnet.impl.file
+edu.smu.tspell.wordnet.impl.file.synset
