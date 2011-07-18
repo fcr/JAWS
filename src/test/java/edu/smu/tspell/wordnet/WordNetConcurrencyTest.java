@@ -32,19 +32,19 @@ import org.junit.Test;
 public class WordNetConcurrencyTest {
 	
     private static Logger logger = Logger.getLogger("com.springsense.disambig.tagger.montyLinguaConcurrencyTest");
-	protected static TaggerType monty = new MontyLingua();
-	protected static List<String> sentences = null;
-	protected static List<String> taggedSentences = null;
+	protected static WordNetDatabase wn = null;
+	protected static List<String> wordList = null;
+	protected static List<Synset[]> synsetsList = null;
 	/**
 	 * Load the stop words needed by the tagger. Stop words are held in the
 	 * data/stoplist.txt
 	 */
 	@SuppressWarnings({ "deprecation" })
 	private  static List<String> loadWordList(String path) {
-		List<String> sents = new ArrayList<String>();
+		List<String> words = new ArrayList<String>();
 		DataInputStream br = null;
 		try {
-			InputStream file = MontyLinguaConcurrencyTest.class.getResourceAsStream(path);
+			InputStream file = WordNetConcurrencyTest.class.getResourceAsStream(path);
 			if (file == null) {
 				throw new IOException("Cannot open file: " + path);
 			}
@@ -53,10 +53,10 @@ public class WordNetConcurrencyTest {
 			String eachLine = br.readLine();
 
 			while (eachLine != null) {
-				sents.add(eachLine);
+				words.add(eachLine);
 				eachLine = br.readLine();
 			}
-			return sents;
+			return words;
 		} catch (FileNotFoundException e) {
 			String msg = "Cannot open the file: " + path;
 			fail(msg);
@@ -72,54 +72,49 @@ public class WordNetConcurrencyTest {
 				// Do nothing
 			}
 		}
-		return sents;
-	}
-	
-	protected static String tagAndLemma(String text) {
-		String t_text = monty.tokenize(text, 1);
-		String ml_tags_str = monty.tag_tokenized(t_text);
-		String ml_lemmitized_str = monty.lemmatise_tagged(ml_tags_str);
-		return ml_lemmitized_str;
+		return words;
 	}
 	
 	/**
 	 * Tag all the sentences sequentially in order to compare with the 
 	 * concurrently tagged results.
 	 */
-	private static void tagSentences() {
-		logger.info("Tagging expected results.");
-		taggedSentences = new ArrayList<String>();
-		for (String sentence: sentences) {
-			String tagged = tagAndLemma(sentence);
-			taggedSentences.add(tagged);
+	private static void getSynsets() {
+		logger.info("Building expected results.");
+		long startTime = System.currentTimeMillis();
+		synsetsList = new ArrayList<Synset[]>();
+		for (String word: wordList) {
+			Synset[] synsets = wn.getSynsets(word, SynsetType.NOUN) ;
+			synsetsList.add(synsets);
 		}
-		taggedSentences = Collections.unmodifiableList(taggedSentences);
-		logger.info("Finished tagging expected results.");
+		synsetsList = Collections.unmodifiableList(synsetsList);
+		long endTime = System.currentTimeMillis();
+		logger.info("Finished building expected results in " + (endTime - startTime) + " milliseconds");
 		
 	}
 	
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		monty = new MontyLingua();
-		sentences = loadWordList("/testData/randomSentences.txt");
-		sentences = Collections.unmodifiableList(sentences);
-		tagSentences();
+		wn = WordNetDatabase.getFileInstance();
+		wordList = loadWordList("/nouns.txt");
+		wordList = Collections.unmodifiableList(wordList);
+		getSynsets();
 	}
 
 	@AfterClass
 	public static void tearDownAfterClass() throws Exception {
-		monty = null;
-		sentences = null;
-		taggedSentences = null;
+		wn = null;
+		wordList = null;
+		synsetsList = null;
 	}
 	
-	protected static String [] results = null;
+	protected static Synset[][] results = null;
 	protected static ArrayList<Integer> scrambledIndices = null;
 
 	
 	@Before
 	public void setUp() throws Exception {
-		results = new String [sentences.size()];
+		results = new Synset [wordList.size()] [];
 		scrambledIndices = new ArrayList<Integer>();
 		for (int i = 0; i < results.length; i++) {
 			scrambledIndices.add(i);
@@ -149,8 +144,8 @@ public class WordNetConcurrencyTest {
 		@Override
 		public void run() {
 			int i = scrambledIndices.get(index);
-			String tagged = tagAndLemma(sentences.get(i));
-			results[i] = tagged;
+			Synset[] synsets = wn.getSynsets(wordList.get(i), SynsetType.NOUN) ;
+			results[i] = synsets;
 			
 		}
 		
@@ -160,7 +155,8 @@ public class WordNetConcurrencyTest {
 	public void testConcurrentTag() {
 		ArrayList<Thread> threads = new ArrayList<Thread>();
 		// Start a thread for each sentence to be tagged.
-		logger.info("Staring " + results.length + " threads for tagging.");
+		logger.info("Starting " + results.length + " threads for test.");
+		long startTime = System.currentTimeMillis();
 		for (int i = 0; i < results.length; i++) {
 			Thread t = new Thread(new Tagger(i));
 			threads.add(t);
@@ -175,11 +171,12 @@ public class WordNetConcurrencyTest {
 				allDone = allDone && !thread.isAlive();
 			}
 		}
-		logger.info("All threads done");
+		long endTime = System.currentTimeMillis();
+		logger.info("All threads done in " + (endTime - startTime) + " milliseconds");
 		
 		// Compare results
 		for (int i = 0; i < results.length; i++) {
-			assertEquals(taggedSentences.get(i), results[i]);
+			assertEquals(synsetsList.get(i).length, results[i].length);
 		}
 		
 	}

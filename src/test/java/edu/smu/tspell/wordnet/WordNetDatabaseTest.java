@@ -12,9 +12,6 @@ public class WordNetDatabaseTest {
 
 	@BeforeClass
 	public static void setUpBeforeClass() throws Exception {
-		System.setProperty("wordnet.database.dir", "/WordNet-3.0/dict");
-		System.setProperty("wordnet.cache.synsets", "5096");
-		System.setProperty("wordnet.cache.words", "5096");
 	}
 
 	@AfterClass
