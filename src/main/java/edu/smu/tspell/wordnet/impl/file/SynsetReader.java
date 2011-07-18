@@ -120,7 +120,7 @@ public class SynsetReader extends RandomAccessReader
 	{
 		String key = Integer.toString(type.getCode());
 		String file = FILE_NAMES.getString(key);
-		String dir = System.getProperty(PropertyNames.DATABASE_DIRECTORY, ".");
+		String dir = PropertyNames.databaseDirectory;
 		return new File(dir, file);
 	}
 

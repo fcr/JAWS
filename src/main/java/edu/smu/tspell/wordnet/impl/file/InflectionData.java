@@ -161,7 +161,7 @@ public class InflectionData
 		String inflection;
 		String[] baseForms;
 
-		String dir = System.getProperty(PropertyNames.DATABASE_DIRECTORY, ".");
+		String dir = PropertyNames.databaseDirectory;
 		File file = new File(dir, fileName);
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		String line = reader.readLine();

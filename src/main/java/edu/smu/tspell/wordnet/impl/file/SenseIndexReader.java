@@ -98,8 +98,7 @@ public class SenseIndexReader extends MultipleLineLocator
 	 */
 	private SenseIndexReader() throws IOException
 	{
-		super(System.getProperty(PropertyNames.DATABASE_DIRECTORY, "."),
-				SENSE_INDEX_FILE);
+		super(PropertyNames.databaseDirectory, SENSE_INDEX_FILE);
 	}
 
 	/**

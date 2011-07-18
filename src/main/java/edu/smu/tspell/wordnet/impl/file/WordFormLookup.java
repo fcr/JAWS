@@ -89,20 +89,7 @@ public class WordFormLookup
 	 */
 	static
 	{
-		String propertyName = PropertyNames.WORD_CACHE_SIZE;
-		String propertyValue = System.getProperty(propertyName);
-		if (propertyValue != null)
-		{
-			try
-			{
-				cacheSize = Integer.parseInt(propertyValue);
-			}
-			catch (NumberFormatException nfe)
-			{
-				System.err.println("'" + propertyValue + "' is an invalid " +
-						"value for " + propertyName + " and will be ignored.");
-			}
-		}
+		cacheSize = PropertyNames.wordCacheSize;
 	}
 
 	/**

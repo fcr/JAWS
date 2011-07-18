@@ -101,20 +101,7 @@ public class SynsetFactory
 	 */
 	static
 	{
-		String propertyName = PropertyNames.SYNSET_CACHE_SIZE;
-		String propertyValue = System.getProperty(propertyName);
-		if (propertyValue != null)
-		{
-			try
-			{
-				cacheSize = Integer.parseInt(propertyValue);
-			}
-			catch (NumberFormatException nfe)
-			{
-				System.err.println("'" + propertyValue + "' is an invalid " +
-						"value for " + propertyName + " and will be ignored.");
-			}
-		}
+		cacheSize = PropertyNames.synsetCacheSize;
 	}
 
 	/**

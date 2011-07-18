@@ -201,8 +201,7 @@ public abstract class SampleSentenceData
 		//  Create a map to hold the results
 		Map keySentences = new HashMap();
 		//  Open the file and start reading it
-		File file = new File(System.getProperty(
-				PropertyNames.DATABASE_DIRECTORY, "."), fileName);
+		File file = new File(PropertyNames.databaseDirectory, fileName);
 		BufferedReader reader = new BufferedReader(new FileReader(file));
 		String line = reader.readLine();
 		//  Loop until there are no more lines to read

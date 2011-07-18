@@ -24,6 +24,10 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Properties;
+
 /**
  * Names of system properties used by the application.
  * 
@@ -31,7 +35,49 @@ package edu.smu.tspell.wordnet.impl.file;
  */
 public class PropertyNames
 {
+	
+	/**
+	 * Identifies the location of the database directory.
+	 */
+	private final static String DATABASE_DIRECTORY = "wordnet.database.dir";
+	public final static String databaseDirectory;
 
+	/**
+	 * Size of the "strong" reference cache of synsets.
+	 */
+	private final static String SYNSET_CACHE_SIZE = "wordnet.cache.synsets";
+	public final static int synsetCacheSize;
+
+	/**
+	 * Size of the "strong" reference cache of word forms.
+	 */
+	private final static String WORD_CACHE_SIZE = "wordnet.cache.words";
+	public final static int wordCacheSize;
+
+	static {
+		Properties props = new Properties();
+		String propertyValue = "";
+
+		// try retrieve data from file
+		try {
+			InputStream input = PropertyNames.class.getResourceAsStream("/wordnet.properties");
+			props.load(input);
+
+			propertyValue = props.getProperty(DATABASE_DIRECTORY);
+			databaseDirectory = propertyValue;
+			propertyValue = props.getProperty(SYNSET_CACHE_SIZE);
+			synsetCacheSize = Integer.parseInt(propertyValue);
+			propertyValue = props.getProperty(WORD_CACHE_SIZE);
+			wordCacheSize = Integer.parseInt(propertyValue);
+		}
+		// catch exception in case properties file does not exist
+		catch (IOException e) {
+			String msg = "'" + propertyValue + "' is an invalid.";
+	        throw new Error(msg, e);
+		}
+	}
+	
+	
 	/**
 	 * No-argument constructor.
 	 */
@@ -39,19 +85,5 @@ public class PropertyNames
 	{
 	}
 
-	/**
-	 * Identifies the location of the database directory.
-	 */
-	public final static String DATABASE_DIRECTORY = "wordnet.database.dir";
-
-	/**
-	 * Size of the "strong" reference cache of synsets.
-	 */
-	public final static String SYNSET_CACHE_SIZE = "wordnet.cache.synsets";
-
-	/**
-	 * Size of the "strong" reference cache of word forms.
-	 */
-	public final static String WORD_CACHE_SIZE = "wordnet.cache.words";
 
 }
