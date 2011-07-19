@@ -10,12 +10,6 @@ COPYRIGHT = ""
 # Specify Maven 2.0 remote repositories here, like this:
 repositories.remote << "http://www.ibiblio.org/maven2"
 
-desc "Java API for WordNet Searching (JAWS) http://lyle.smu.edu/~tspell/jaws/index.html 
-is an API that provides Java applications with the ability to retrieve data from the WordNet 
-database. It is a simple and fast API that is compatible with both the 2.1 and 3.0 versions 
-of the WordNet database files and can be used with Java 1.4 and later. 
-This version is modified to run as self contained jar from within .war"
-
 define "jaws" do
 
   project.version = "1.3.1"
