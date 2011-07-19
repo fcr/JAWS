@@ -8,7 +8,7 @@ GROUP = "edu.smu.tspell"
 COPYRIGHT = ""
 
 # Specify Maven 2.0 remote repositories here, like this:
-repositories.remote << "git@github.com:fcr/JAWS.git"
+repositories.remote << "http://www.ibiblio.org/maven2"
 
 desc "Java API for WordNet Searching (JAWS) http://lyle.smu.edu/~tspell/jaws/index.html 
 is an API that provides Java applications with the ability to retrieve data from the WordNet 
@@ -21,8 +21,16 @@ define "jaws" do
   project.version = "1.3.1"
   project.group = "edu.smu.tspell"
   manifest["Implementation-Vendor"] = COPYRIGHT
+  
+  download(artifact("junit4:junit4:jar:4.8.2")=> "https://github.com/downloads/KentBeck/junit/junit-4.8.2.jar")
+  
   compile.with # Add classpath dependencies
+  
   resources
-  test.compile.with # Add classpath dependencies
+  
+  test.compile.with 'junit4:junit4:jar:4.8.2'
+  test.resources
+  
   package(:jar)
+  
 end
