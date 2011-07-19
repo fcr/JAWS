@@ -49,9 +49,9 @@ public class LineLocator extends RandomAccessReader {
 	 * @param  file File that is to be read.
 	 * @throws IOException An error occurred during initialization.
 	 */
-	protected LineLocator(File file) throws IOException
+	protected LineLocator(String fileName) throws IOException
 	{
-		super(file);
+		super(fileName);
 	}
 
 	/**

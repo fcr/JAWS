@@ -27,7 +27,9 @@ package edu.smu.tspell.wordnet.impl;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.nio.ByteBuffer;
 
 /**
  * Used to access the data at arbitrary positions within a file.
@@ -50,18 +52,18 @@ public abstract class RandomAccessReader
 	/**
 	 * Provides random access to the content of the file being read.
 	 */
-	protected RandomAccessFile accessor;
-
+	protected ByteBuffer accessor;
+	
 	/**
 	 * The file's size in bytes, which is assumed not to change.
 	 */
-	private long fileSize;
+	private int fileSize;
 
 	/**
 	 * Pointer to the next byte in the file that will be read.
 	 */
-	private long filePointer;
-
+	private int filePointer;
+	
 	/**
 	 * Constructs an instance of this class, specifying the file that is to
 	 * be read.
@@ -69,12 +71,21 @@ public abstract class RandomAccessReader
 	 * @param  file File that is to be read.
 	 * @throws FileNotFoundException The specified file does not exist.
 	 */
-	protected RandomAccessReader(File file) throws IOException
+	protected RandomAccessReader(String name) throws IOException
 	{
 		super();
-		accessor = new RandomAccessFile(file, ACCESS_MODE);
-		fileSize = file.length();
-		filePointer = accessor.getFilePointer();
+		InputStream stream = getClass().getResourceAsStream(name);
+		if (stream == null) {
+			throw new IOException("Cannot open resource: " + name);
+		}
+		fileSize = stream.available();
+		byte [] buffer = new byte[(int)fileSize];
+		int read = stream.read(buffer);
+		if (read != fileSize) {
+			throw new IOException("Unsuccessful read from: " + name);			
+		}
+		accessor = ByteBuffer.wrap(buffer);
+		filePointer = accessor.position();
 	}
 
 
@@ -89,9 +100,9 @@ public abstract class RandomAccessReader
 	{
 		if (newPosition != filePointer)
 		{
-			RandomAccessFile reader = getAccessor();
-			reader.seek(newPosition);
-			filePointer = newPosition;
+			ByteBuffer reader = getAccessor();
+			reader.position((int)newPosition);
+			filePointer = (int)newPosition;
 		}
 	}
 
@@ -136,7 +147,7 @@ public abstract class RandomAccessReader
 		char nextChar = (char)(-1);
 		if (filePointer < fileSize)
 		{
-			nextChar = (char)(accessor.read());
+			nextChar = (char)accessor.get();
 			filePointer++;
 		}
 		return nextChar;
@@ -147,7 +158,7 @@ public abstract class RandomAccessReader
 	 * 
 	 * @return Random access file reader.
 	 */
-	protected RandomAccessFile getAccessor()
+	protected ByteBuffer getAccessor()
 	{
 		return accessor;
 	}
@@ -181,19 +192,7 @@ public abstract class RandomAccessReader
 	 */
 	protected void finalize() throws Throwable
 	{
-		try
-		{
-			RandomAccessFile accessor = getAccessor();
-			if (accessor != null)
-			{
-				accessor.close();
-			}
-		}
-		catch (IOException ioe)
-		{
-			System.err.println("Error closing file: " + ioe.getMessage());
-			ioe.printStackTrace();
-		}
+		accessor = null;
 	}
 
 }

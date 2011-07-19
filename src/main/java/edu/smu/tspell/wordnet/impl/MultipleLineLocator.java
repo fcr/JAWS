@@ -45,7 +45,7 @@ public abstract class MultipleLineLocator extends LineLocator {
 	 */
 	public MultipleLineLocator(String parent, String child) throws IOException
 	{
-		super(new File(parent, child));
+		super(parent + child);
 	}
 
 	/**

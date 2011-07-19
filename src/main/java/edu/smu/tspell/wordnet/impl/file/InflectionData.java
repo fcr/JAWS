@@ -24,19 +24,18 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
-import edu.smu.tspell.wordnet.SynsetType;
-
 import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
+import java.io.DataInputStream;
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
+import edu.smu.tspell.wordnet.SynsetType;
 
 /**
  * Provides access to morphology exception data. These represent "irregular
@@ -154,6 +153,7 @@ public class InflectionData
 	 * @param  type Syntactic type associated with the file.
 	 * @throws RetrievalException An error occurred reading the exception data.
 	 */
+	@SuppressWarnings("deprecation")
 	private void loadExceptions(String fileName, SynsetType type)
 			throws IOException
 	{
@@ -162,8 +162,8 @@ public class InflectionData
 		String[] baseForms;
 
 		String dir = PropertyNames.databaseDirectory;
-		File file = new File(dir, fileName);
-		BufferedReader reader = new BufferedReader(new FileReader(file));
+		InputStream file = getClass().getResourceAsStream(dir + fileName);
+		DataInputStream reader = new DataInputStream(file);
 		String line = reader.readLine();
 		//  Loop through all lines in the file
 		while (line != null)

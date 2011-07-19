@@ -27,9 +27,11 @@ package edu.smu.tspell.wordnet.impl.file;
 import edu.smu.tspell.wordnet.SynsetType;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.InputStream;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -192,6 +194,7 @@ public abstract class SampleSentenceData
 	 * @return Map that encapsulates the data read.
 	 * @throws IOException An error occurred reading the file.
 	 */
+	@SuppressWarnings("deprecation")
 	private Map createMap(String fileName) throws IOException
 	{
 		int index;
@@ -201,8 +204,8 @@ public abstract class SampleSentenceData
 		//  Create a map to hold the results
 		Map keySentences = new HashMap();
 		//  Open the file and start reading it
-		File file = new File(PropertyNames.databaseDirectory, fileName);
-		BufferedReader reader = new BufferedReader(new FileReader(file));
+		InputStream file = getClass().getResourceAsStream(PropertyNames.databaseDirectory + fileName);
+		DataInputStream reader = new DataInputStream(file);
 		String line = reader.readLine();
 		//  Loop until there are no more lines to read
 		while (line != null)

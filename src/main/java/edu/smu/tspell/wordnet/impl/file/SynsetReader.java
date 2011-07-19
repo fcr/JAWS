@@ -116,12 +116,12 @@ public class SynsetReader extends RandomAccessReader
 	 * @param  type Synset type for which to return a file.
 	 * @return File that can be used to read synsets of the specified category.
 	 */
-	private static File getFile(SynsetType type)
+	private static String getFile(SynsetType type)
 	{
 		String key = Integer.toString(type.getCode());
 		String file = FILE_NAMES.getString(key);
 		String dir = PropertyNames.databaseDirectory;
-		return new File(dir, file);
+		return dir + file;
 	}
 
 	/**
@@ -131,9 +131,9 @@ public class SynsetReader extends RandomAccessReader
 	 * @param  file File from which this instance will read synsets.
 	 * @throws IOException An error occurred opening the data file.
 	 */
-	private SynsetReader(File file) throws IOException
+	private SynsetReader(String fileName) throws IOException
 	{
-		super(file);
+		super(fileName);
 	}
 
 	/**

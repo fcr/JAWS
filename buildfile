@@ -18,8 +18,8 @@ This version is modified to run as self contained jar from within .war"
 
 define "jaws" do
 
-  project.version = 1.3.1
-  project.group = edu.smu.tspell
+  project.version = "1.3.1"
+  project.group = "edu.smu.tspell"
   manifest["Implementation-Vendor"] = COPYRIGHT
   compile.with # Add classpath dependencies
   resources
