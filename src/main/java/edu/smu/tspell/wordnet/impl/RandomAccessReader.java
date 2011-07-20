@@ -30,6 +30,8 @@ import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 
+import org.apache.commons.io.IOUtils;
+
 /**
  * Used to access the data at arbitrary positions within a file.
  * 
@@ -78,8 +80,8 @@ public abstract class RandomAccessReader
 			throw new IOException("Cannot open resource: " + name);
 		}
 		fileSize = stream.available();
-		byte [] buffer = new byte[(int)fileSize];
-		int read = stream.read(buffer, 0, fileSize);
+		byte [] buffer = IOUtils.toByteArray(stream);
+		int read = buffer.length;
 		if (read != fileSize) {
 			throw new IOException("Unsuccessful read from: " + name + " " + read + " instead of " + fileSize);			
 		}
