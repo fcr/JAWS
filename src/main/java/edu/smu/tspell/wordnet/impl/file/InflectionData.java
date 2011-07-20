@@ -24,8 +24,6 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.Enumeration;
@@ -34,6 +32,9 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringTokenizer;
 import java.util.TreeMap;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 
 import edu.smu.tspell.wordnet.SynsetType;
 
@@ -153,7 +154,6 @@ public class InflectionData
 	 * @param  type Syntactic type associated with the file.
 	 * @throws RetrievalException An error occurred reading the exception data.
 	 */
-	@SuppressWarnings("deprecation")
 	private void loadExceptions(String fileName, SynsetType type)
 			throws IOException
 	{
@@ -163,11 +163,11 @@ public class InflectionData
 
 		String dir = PropertyNames.databaseDirectory;
 		InputStream file = getClass().getResourceAsStream(dir + fileName);
-		DataInputStream reader = new DataInputStream(file);
-		String line = reader.readLine();
+		LineIterator iterator = IOUtils.lineIterator(file, null);
 		//  Loop through all lines in the file
-		while (line != null)
+		while (iterator.hasNext())
 		{
+			String line = (String)iterator.next();
 			//  Parse the inflected word
 			tokenizer = new StringTokenizer(line, WORD_DELIMITER);
 			inflection = TextTranslator.translateToExternalFormat(
@@ -181,10 +181,8 @@ public class InflectionData
 			}
 			//  Add an entry to the list for this word
 			putMorphology(inflection, baseForms, type);
-			//  Try to get another line
-			line = reader.readLine();
 		}
-		reader.close();
+		file.close();
 	}
 
 	/**

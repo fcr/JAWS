@@ -38,6 +38,9 @@ import java.util.Map;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+
 /**
  * Caches data related to sample sentences, loading and caching the data
  * file content only when it's accessed.
@@ -194,7 +197,6 @@ public abstract class SampleSentenceData
 	 * @return Map that encapsulates the data read.
 	 * @throws IOException An error occurred reading the file.
 	 */
-	@SuppressWarnings("deprecation")
 	private Map createMap(String fileName) throws IOException
 	{
 		int index;
@@ -205,11 +207,11 @@ public abstract class SampleSentenceData
 		Map keySentences = new HashMap();
 		//  Open the file and start reading it
 		InputStream file = getClass().getResourceAsStream(PropertyNames.databaseDirectory + fileName);
-		DataInputStream reader = new DataInputStream(file);
-		String line = reader.readLine();
-		//  Loop until there are no more lines to read
-		while (line != null)
+		LineIterator iterator = IOUtils.lineIterator(file, null);
+		//  Loop through all lines in the file
+		while (iterator.hasNext())
 		{
+			String line = (String)iterator.next();
 			//  Find out where the key ends
 			index = line.indexOf(KEY_TERMINATOR);
 			//  Get the key and value
@@ -217,9 +219,8 @@ public abstract class SampleSentenceData
 			value = line.substring(index + 1).trim();
 			//  Add them to the cache and read the next line
 			putKeyValuePair(keySentences, key, value);
-			line = reader.readLine();
 		}
-		reader.close();
+		file.close();
 		return keySentences;
 	}
 
