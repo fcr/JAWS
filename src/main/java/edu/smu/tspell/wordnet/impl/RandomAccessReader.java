@@ -24,7 +24,6 @@
  */
 package edu.smu.tspell.wordnet.impl;
 
-import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -80,9 +79,9 @@ public abstract class RandomAccessReader
 		}
 		fileSize = stream.available();
 		byte [] buffer = new byte[(int)fileSize];
-		int read = stream.read(buffer);
+		int read = stream.read(buffer, 0, fileSize);
 		if (read != fileSize) {
-			throw new IOException("Unsuccessful read from: " + name);			
+			throw new IOException("Unsuccessful read from: " + name + " " + read + " instead of " + fileSize);			
 		}
 		accessor = ByteBuffer.wrap(buffer);
 		filePointer = accessor.position();
