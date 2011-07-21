@@ -267,6 +267,7 @@ public class WordFormLookup
 		{
 			synset = factory.getSynset(indexEntries[i].getSynsetPointer());
 			type = synset.getType();
+			((ReferenceSynset)synset).setSenseNumber(indexEntries[i].getSenseNumber());
 			//  Also add the new synset to our cache
 			categoryList = (List)(subMap.get(type));
 			//  If this is the first one, create a new list and store it

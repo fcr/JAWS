@@ -86,6 +86,11 @@ public abstract class ReferenceSynset extends AbstractSynset
 	private int offset;
 
 	/**
+	 * A decimal integer indicating the sense number of the word, within the part of speech encoded in sense_key.
+	 */
+	private int senseNumber;
+
+	/**
 	 * Encapsulates the resolved relationships between this synset and others.
 	 */
 	private RelationshipReferences references = new RelationshipReferences();
@@ -110,6 +115,7 @@ public abstract class ReferenceSynset extends AbstractSynset
 		this.pointers = pointers;
 		this.lexicalFileNumber = lexicalFile;
 		this.offset = offset;
+		this.senseNumber = -1;
 
 		this.tagCounts = new int[senseKeys.length];
 		for (int i = 0; i < tagCounts.length; i++)
@@ -160,6 +166,34 @@ public abstract class ReferenceSynset extends AbstractSynset
 			tagCounts[index] = entry.getTagCount();
 		}
 		return tagCounts[index];
+	}
+	
+	/**
+	 * A decimal integer indicating the sense number of the word, within the 
+	 * part of speech encoded in sense_key, in the WordNet database.
+	 * 
+	 * @param the sense number
+	 */
+	void setSenseNumber(int senseNumber) {
+		this.senseNumber = senseNumber;
+	}
+
+	/**
+	 * A decimal integer indicating the sense number of the word, within the 
+	 * part of speech encoded in sense_key, in the WordNet database.
+	 * 
+	 * @return The sense number
+	 */
+	public int getSenseNumber() {
+		if (senseNumber < 0)
+		{
+			// Normally we should not need to get here.
+			synchronized (this) {
+				SenseIndexEntry entry = getIndexEntry(senseKeys[0]);
+				senseNumber = entry.getSenseNumber();
+			}
+		}
+		return senseNumber;
 	}
 
 	/**
