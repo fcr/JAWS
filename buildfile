@@ -2,7 +2,7 @@
 
 
 # Version number for this release
-VERSION_NUMBER = "1.3.1"
+VERSION_NUMBER = "1.3.1.#{ENV['BUILD_NUMBER'] || 'local'}"
 # Group identifier for your projects
 GROUP = "edu.smu.tspell"
 COPYRIGHT = ""
@@ -12,7 +12,7 @@ repositories.remote << "http://www.ibiblio.org/maven2"
 
 define "jaws" do
 
-  project.version = "1.3.1"
+  project.version = VERSION_NUMBER
   project.group = "edu.smu.tspell"
   manifest["Implementation-Vendor"] = COPYRIGHT
   
