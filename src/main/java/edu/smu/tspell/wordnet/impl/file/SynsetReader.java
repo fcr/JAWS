@@ -24,18 +24,12 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
-import edu.smu.tspell.wordnet.SynsetType;
-
-import edu.smu.tspell.wordnet.impl.RandomAccessReader;
-
 import java.io.File;
 import java.io.IOException;
-
-import java.lang.ref.WeakReference;
-
-import java.util.HashMap;
-import java.util.Map;
 import java.util.ResourceBundle;
+
+import edu.smu.tspell.wordnet.SynsetType;
+import edu.smu.tspell.wordnet.impl.RandomAccessReader;
 
 /**
  * Reads synset information from a data file (e.g., <code>data.noun</code>)
@@ -64,12 +58,6 @@ public class SynsetReader extends RandomAccessReader
 			SynsetReader.class.getName());
 
 	/**
-	 * Contains references to the instances of this file that have already
-	 * been created.
-	 */
-	private final static Map READER_MAP = new HashMap();
-
-	/**
 	 * Returns an instance of this file that can be used to read from the
 	 * data file associated with a specific syntactic category.
 	 * <br><p>
@@ -84,28 +72,14 @@ public class SynsetReader extends RandomAccessReader
 	public static SynsetReader getInstance(SynsetType type)
 	{
 		SynsetReader instance = null;
-		WeakReference ref = (WeakReference)(READER_MAP.get(type));
-		//  If we already created an instance for this type, try to use it
-		if (ref != null)
+		try
 		{
-			//  May return null if the referent object was garbage collected
-			instance = (SynsetReader)(ref.get());
+			instance = new SynsetReader(getFile(type));
 		}
-		//  If we don't have an existing instance, we'll need to create one
-		if (instance == null)
+		catch (IOException ioe)
 		{
-			try
-			{
-				instance = new SynsetReader(getFile(type));
-				//  Cache it at least temporarily
-				ref = new WeakReference(instance);
-				READER_MAP.put(type, ref);
-			}
-			catch (IOException ioe)
-			{
-				throw new RetrievalException(
-						"Error accessing file: " + ioe.getMessage(), ioe);
-			}
+			throw new RetrievalException(
+					"Error accessing file: " + ioe.getMessage(), ioe);
 		}
 		return instance;
 	}
@@ -143,7 +117,7 @@ public class SynsetReader extends RandomAccessReader
 	 * @return Text that represents a line of data from the data file.
 	 * @throws IOException An error occurred reading the synset data.
 	 */
-	public synchronized String readData(SynsetPointer pointer)
+	public String readData(SynsetPointer pointer)
 			throws IOException
 	{
 		seek(pointer.getOffset());

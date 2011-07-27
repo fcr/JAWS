@@ -26,7 +26,6 @@ package edu.smu.tspell.wordnet.impl.file;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,7 +51,7 @@ public class SenseIndexReader
 	/**
 	 * Reference to the singleton instance of this class.
 	 */
-	private static WeakReference<SenseIndexReader> reference;
+	private static final SenseIndexReader instance = new SenseIndexReader();
 
 	/**
 	 * Used to parse lines read from the sense index file.
@@ -74,29 +73,7 @@ public class SenseIndexReader
 	 * @throws RetrievalException An error occurred opening the index file.
 	 */
 	public static SenseIndexReader getInstance()
-			throws RetrievalException
 	{
-		SenseIndexReader instance = null;
-		//  See if there's one we can get to through the weak reference
-		if (reference != null)
-		{
-			instance = (SenseIndexReader)(reference.get());
-		}
-		//  It was either garbage collected or never created in the first place
-		if (instance == null)
-		{
-			//  Create a new one and create a weak reference to it
-			try
-			{
-				instance = new SenseIndexReader();
-				reference = new WeakReference<SenseIndexReader>(instance);
-			}
-			catch (IOException ioe)
-			{
-				throw new RetrievalException(
-						"Error opening index file: " + ioe.getMessage(), ioe);
-			}
-		}
 		return instance;
 	}
 
@@ -141,9 +118,13 @@ public class SenseIndexReader
 	 * This constructor ensures that instances of this class can't be
 	 * constructed by other classes.
 	 */
-	private SenseIndexReader() throws IOException
+	private SenseIndexReader()
 	{
-		loadSenseIndexEntries(SENSE_INDEX_FILE);
+		try {
+			loadSenseIndexEntries(SENSE_INDEX_FILE);
+		} catch (IOException e) {
+			throw new Error(e);
+		}
 	}
 
 	/**

@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.HashMap;
 
 import edu.smu.tspell.wordnet.Synset;
+import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.WordNetException;
 
 /**
@@ -44,6 +45,12 @@ import edu.smu.tspell.wordnet.WordNetException;
  */
 public class SynsetFactory
 {
+
+	/**
+	 * Contains references to the instances of this file that have already
+	 * been created.
+	 */
+	private HashMap<SynsetType,SynsetReader>  readers = new HashMap<SynsetType,SynsetReader>();
 
 	/**
 	 * Singleton instance of this class.
@@ -80,6 +87,21 @@ public class SynsetFactory
 	 */
 	private SynsetFactory()
 	{
+	}
+	
+	/**
+	 * Get the reader
+	 *  for this type.
+	 * @param type
+	 * @return
+	 */
+	private SynsetReader getReader(SynsetType type) {
+		SynsetReader reader = readers.get(type);
+		if (reader == null) {
+			reader = SynsetReader.getInstance(type);
+			readers.put(type, reader);
+		}
+		return reader;
 	}
 
 	/**
@@ -120,7 +142,7 @@ public class SynsetFactory
 		String data = null;
 		try
 		{
-			SynsetReader reader = SynsetReader.getInstance(pointer.getType());
+			SynsetReader reader = getReader(pointer.getType());
 			data = reader.readData(pointer);
 			SynsetParser parser = new SynsetParser();
 			synset = parser.createSynset(data);
@@ -140,6 +162,13 @@ public class SynsetFactory
 					"An error occurred parsing the synset data: " + data, e);
 		}
 		return synset;
+	}
+	
+	public void closeReaders() {
+		for (SynsetReader reader: readers.values()) {
+			reader.close();
+		}
+		readers = null;
 	}
 
 }

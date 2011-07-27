@@ -186,13 +186,9 @@ public abstract class RandomAccessReader
 	}
 
 	/**
-	 * Called by the garbage collector when it's about to reclaim the memory
-	 * associated with this object.
-	 * <br><p>
-	 * We use this opportunity to close the file that was being read;
-	 * otherwise the file would remain open until the JVM exited.
+	 * Release the data of the file that was being read.
 	 */
-	protected void finalize() throws Throwable
+	public void close()
 	{
 		accessor = null;
 	}

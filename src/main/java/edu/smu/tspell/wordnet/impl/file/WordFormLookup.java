@@ -31,6 +31,7 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.TreeMap;
+import java.util.logging.Logger;
 
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
@@ -58,7 +59,9 @@ import edu.smu.tspell.wordnet.WordNetException;
 public class WordFormLookup
 {
 
-	/**
+    private static Logger logger = Logger.getLogger("edu.smu.tspell.wordnet");
+
+    /**
 	 * Singleton instance of this class.
 	 */
 	private static final WordFormLookup instance = new WordFormLookup();;
@@ -84,12 +87,12 @@ public class WordFormLookup
 	 */
 	private WordFormLookup()
 	{
-		System.out.println("Starting to load WordNet data to memory.");
+		logger.info("Starting to load WordNet data to memory.");
 		long startTime = System.currentTimeMillis();
 		loadAllSynsets();
 		Morphology.getInstance();
 		long endTime = System.currentTimeMillis();
-		System.out.println("Finished loading WordNet data to memory in " + (endTime - startTime)/1000 + " seconds");
+		logger.info("Finished loading WordNet data to memory in " + (endTime - startTime)/1000 + " seconds");
 	}
 
 	/**
@@ -284,6 +287,7 @@ public class WordFormLookup
 				Collections.sort(categoryList, comparator);
 			}
 		}
+		factory.closeReaders();
 		
 	}
 
