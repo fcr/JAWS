@@ -28,7 +28,6 @@ import edu.smu.tspell.wordnet.AdjectiveSynset;
 import edu.smu.tspell.wordnet.NounSynset;
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
-
 import edu.smu.tspell.wordnet.impl.file.ReferenceSynset;
 import edu.smu.tspell.wordnet.impl.file.RelationshipPointers;
 import edu.smu.tspell.wordnet.impl.file.RelationshipType;
@@ -252,4 +251,31 @@ public class NounReferenceSynset extends ReferenceSynset
 		return getSynsets(RelationshipType.MEMBER_OF_DOMAIN_USAGE);
 	}
 
+	/**
+	 * Populate all the semantic and lexical relationships.
+	 * 
+	 */
+	protected String [] populateRelationships() {
+		// Populate the lexical relationships
+		String [] wordForms = super.populateRelationships();
+
+		// Populate the semantic relationships.
+		getAttributes();
+		getHypernyms();
+		getHyponyms();
+		getInstanceHypernyms();
+		getInstanceHyponyms();
+		getMemberHolonyms();
+		getMemberMeronyms();
+		getPartHolonyms();
+		getPartMeronyms();
+		getRegionMembers();
+		getSubstanceHolonyms();
+		getSubstanceMeronyms();
+		getTopicMembers();
+		getUsageMembers();
+		
+		return wordForms;
+	}
+	
 }

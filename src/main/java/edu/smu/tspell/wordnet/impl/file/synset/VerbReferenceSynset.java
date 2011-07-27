@@ -200,4 +200,25 @@ public class VerbReferenceSynset extends ReferenceSynset implements VerbSynset
 		return examples.getFormattedTemplates(wordForm);
 	}
 
+	/**
+	 * Populate all the semantic and lexical relationships.
+	 * 
+	 */
+	protected String [] populateRelationships() {
+		// Populate the lexical relationships
+		String [] wordForms = super.populateRelationships();
+		for (int i = 0; i < wordForms.length; i++) {
+			String wordForm = wordForms[i];
+			getPhrases(wordForm);
+		}
+
+		// Populate the semantic relationships.
+		getEntailments();
+		getHypernyms();
+		getOutcomes();
+		getTroponyms();
+		getVerbGroup();
+		
+		return wordForms;
+	}
 }

@@ -44,19 +44,15 @@ public class SampleIndexFactory extends SampleSentenceData
 	/**
 	 * Singleton instance of this class.
 	 */
-	private static SampleIndexFactory instance;
+	private static final SampleIndexFactory instance = new SampleIndexFactory();
 
 	/**
 	 * Returns a reference to the singleton instance of this class.
 	 * 
 	 * @return Reference to the singleton instance of this class.
 	 */
-	public synchronized static SampleIndexFactory getInstance()
+	public static SampleIndexFactory getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new SampleIndexFactory();
-		}
 		return instance;
 	}
 
@@ -100,7 +96,7 @@ public class SampleIndexFactory extends SampleSentenceData
 	 * @param  senseKey Word sense for which to return the ID numbers.
 	 * @return Template identifiers that correspond to the specified word sense.
 	 */
-	public synchronized String[] getSampleKeys(SenseKey senseKey)
+	public String[] getSampleKeys(SenseKey senseKey)
 	{
 		String[] keys =
 				(String[])(super.getValue(senseKey.getType(), senseKey));

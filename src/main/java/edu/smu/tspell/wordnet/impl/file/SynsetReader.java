@@ -81,7 +81,7 @@ public class SynsetReader extends RandomAccessReader
 	 * @param  type Synset type for which to perform reads.
 	 * @return Instance of this class that can be used to read synsets.
 	 */
-	public synchronized static SynsetReader getInstance(SynsetType type)
+	public static SynsetReader getInstance(SynsetType type)
 	{
 		SynsetReader instance = null;
 		WeakReference ref = (WeakReference)(READER_MAP.get(type));

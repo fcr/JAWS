@@ -12,6 +12,7 @@ repositories.remote << "http://www.ibiblio.org/maven2"
 
 define "jaws" do
 
+  ENV['JAVA_OPTS'] ||= '-Xmx1g'
   project.version = VERSION_NUMBER
   project.group = "edu.smu.tspell"
   manifest["Implementation-Vendor"] = COPYRIGHT
@@ -22,6 +23,7 @@ define "jaws" do
   
   resources
   
+  test.using :java_args => [ '-Xmx1g' ]
   test.compile.with 'junit4:junit4:jar:4.8.2'
   test.resources
   

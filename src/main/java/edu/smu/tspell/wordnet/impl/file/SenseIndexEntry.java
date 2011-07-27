@@ -31,7 +31,7 @@ package edu.smu.tspell.wordnet.impl.file;
  * @see <a href="http://wordnet.princeton.edu/man/senseidx.5WN">Format of
  *      the sense index file.</a>
  */
-public class SenseIndexEntry implements Comparable
+public class SenseIndexEntry implements Comparable<SenseIndexEntry>
 {
 
 	/**
@@ -62,7 +62,7 @@ public class SenseIndexEntry implements Comparable
 	 * of the synsets.
 	 */
 	private int tagCount;
-
+	
 	/**
 	 * Constructor that accepts various properties that are part of this class.
 	 *
@@ -71,14 +71,14 @@ public class SenseIndexEntry implements Comparable
 	 * @param  senseNumber Uniquely identifies a sense for a part of speech.
 	 * @param  tagCount Number of senses ranked according to frequency.
 	 */
-	public SenseIndexEntry(
-			SenseKey senseKey, int synsetOffset, int senseNumber, int tagCount)
+	public SenseIndexEntry(SenseKey senseKey, int synsetOffset, int senseNumber, int tagCount)
 	{
 		this.senseKey = senseKey;
 		this.synsetOffset = synsetOffset;
 		this.senseNumber = senseNumber;
 		this.tagCount = tagCount;
 	}
+	
 
 	/**
 	 * Returns the synset pointer associated with this index entry.
@@ -143,7 +143,7 @@ public class SenseIndexEntry implements Comparable
 	 *         than, equal to, or greater than the reference object,
 	 *         respectively.
 	 */
-	public int compareTo(Object o)
+	public int compareTo(SenseIndexEntry o)
 	{
 		int relativeValue = 1;
 		if (o != null)

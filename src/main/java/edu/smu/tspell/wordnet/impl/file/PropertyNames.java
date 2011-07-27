@@ -43,16 +43,10 @@ public class PropertyNames
 	public final static String databaseDirectory;
 
 	/**
-	 * Size of the "strong" reference cache of synsets.
+	 * If true use the native word forms form (compound words joined by underscores).
 	 */
-	private final static String SYNSET_CACHE_SIZE = "wordnet.cache.synsets";
-	public final static int synsetCacheSize;
-
-	/**
-	 * Size of the "strong" reference cache of word forms.
-	 */
-	private final static String WORD_CACHE_SIZE = "wordnet.cache.words";
-	public final static int wordCacheSize;
+	private final static String WORD_FORMAT = "wordnet.database.nativeFormat";
+	public final static boolean nativeFormat;
 
 	static {
 		Properties props = new Properties();
@@ -65,10 +59,9 @@ public class PropertyNames
 
 			propertyValue = props.getProperty(DATABASE_DIRECTORY);
 			databaseDirectory = propertyValue;
-			propertyValue = props.getProperty(SYNSET_CACHE_SIZE);
-			synsetCacheSize = Integer.parseInt(propertyValue);
-			propertyValue = props.getProperty(WORD_CACHE_SIZE);
-			wordCacheSize = Integer.parseInt(propertyValue);
+			propertyValue = props.getProperty(WORD_FORMAT);
+			nativeFormat = propertyValue.toLowerCase().equals("true");
+			input.close();
 		}
 		// catch exception in case properties file does not exist
 		catch (IOException e) {

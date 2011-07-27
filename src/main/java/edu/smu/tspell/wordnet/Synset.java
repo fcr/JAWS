@@ -125,12 +125,4 @@ public interface Synset
 	 */
 	public String[] getUsageExamples();
 	
-	/**
-	 * A decimal integer indicating the sense number of the word, within the 
-	 * part of speech encoded in sense_key, in the WordNet database.
-	 * 
-	 * @return The sense number
-	 */
-	public int getSenseNumber();
-
 }

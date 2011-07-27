@@ -84,7 +84,7 @@ public abstract class MultipleLineLocator extends LineLocator {
 	 *         bound (suffix) text.
 	 * @throws IOException An error occurred reading the file.
 	 */
-	protected synchronized String[] getLines(String first, String last)
+	protected String[] getLines(String first, String last)
 			throws IOException
 	{
 		//  Create a list for storing the results

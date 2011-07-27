@@ -45,19 +45,15 @@ public class SampleFrameFactory extends SampleSentenceData
 	/**
 	 * Singleton instance of this class.
 	 */
-	private static SampleFrameFactory instance;
+	private static final SampleFrameFactory instance = new SampleFrameFactory();
 
 	/**
 	 * Returns a reference to the singleton instance of this class.
 	 * 
 	 * @return Reference to the singleton instance of this class.
 	 */
-	public static synchronized SampleFrameFactory getInstance()
+	public static SampleFrameFactory getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new SampleFrameFactory();
-		}
 		return instance;
 	}
 

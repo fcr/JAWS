@@ -72,6 +72,10 @@ public abstract class SampleSentenceData
 	 */
 	protected SampleSentenceData()
 	{
+		SynsetType[]  types = SynsetType.ALL_TYPES;
+		for (int i = 0; i < types.length; i++) {
+			getSubMap(types[i]);
+		}
 	}
 
 	/**
@@ -97,7 +101,7 @@ public abstract class SampleSentenceData
 	 *         values available for the specified synset type.
 	 * @throws RetrievalException An error occurred reading the data.
 	 */
-	private synchronized Map getSubMap(SynsetType type)
+	private Map getSubMap(SynsetType type)
 			throws RetrievalException
 	{
 		Map subMap;

@@ -24,16 +24,17 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.TreeMap;
+
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.WordNetException;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-import java.util.WeakHashMap;
 
 /**
  * This is the main class that's used to perform lookups based upon a word
@@ -58,51 +59,22 @@ public class WordFormLookup
 {
 
 	/**
-	 * Default number of synsets to cache.
-	 */
-	private final static int DEFAULT_CACHE_SIZE = 500;
-
-	/**
-	 * Number of word forms that will be cached.
-	 */
-	private static int cacheSize = DEFAULT_CACHE_SIZE;
-
-	/**
 	 * Singleton instance of this class.
 	 */
-	private static WordFormLookup instance;
+	private static final WordFormLookup instance = new WordFormLookup();;
 
 	/**
 	 * Map in which the retrieved data is cached.
 	 */
-	private Map wordCategories = new WeakHashMap();
-
-	/**
-	 * Maintains "strong" references to the word forms to ensure that they
-	 * don't get garbage collected.
-	 */
-	private LeastRecentlyUsedCache cache =
-			new LeastRecentlyUsedCache(cacheSize);
-
-	/**
-	 * Static initializer that updates the cache size if one was specified.
-	 */
-	static
-	{
-		cacheSize = PropertyNames.wordCacheSize;
-	}
+	private HashMap<String, TreeMap<SynsetType, ArrayList<Synset>>> wordCategories = new HashMap<String, TreeMap<SynsetType, ArrayList<Synset>>>();
 
 	/**
 	 * Returns a reference to the singleton instance of this class.
 	 *
 	 * @return Singleton instance of this class.
 	 */
-	public synchronized static WordFormLookup getInstance()
+	public static WordFormLookup getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new WordFormLookup();
-		}
 		return instance;
 	}
 
@@ -112,6 +84,12 @@ public class WordFormLookup
 	 */
 	private WordFormLookup()
 	{
+		System.out.println("Starting to load WordNet data to memory.");
+		long startTime = System.currentTimeMillis();
+		loadAllSynsets();
+		Morphology.getInstance();
+		long endTime = System.currentTimeMillis();
+		System.out.println("Finished loading WordNet data to memory in " + (endTime - startTime)/1000 + " seconds");
 	}
 
 	/**
@@ -143,15 +121,17 @@ public class WordFormLookup
 	 *         form are returned.
 	 * @throws WordNetException An error occurred retrieving the data.
 	 */
-	public synchronized Synset[] getSynsets(
-			String wordForm, SynsetType[] types, boolean useMorphology)
+	public Synset[] getSynsets(
+			String externalWordForm, SynsetType[] types, boolean useMorphology)
 			throws WordNetException
 	{
 		Synset[] synsetArray;
 		String[] candidates;
+		
+		String wordForm = TextTranslator.translateToDatabaseFormat(externalWordForm);
 
 		//  Create the list that will hold the results
-		List synsetList = new ArrayList();
+		List<Synset> synsetList = new ArrayList<Synset>();
 		//  Loop through the synset types
 		for (int i = 0; i < types.length; i++)
 		{
@@ -208,30 +188,26 @@ public class WordFormLookup
 		int count;
 
 		//  Create a list to hold the synsets we'll return
-		List synsetList = new ArrayList();
+		ArrayList<Synset> synsetList = new ArrayList<Synset>();
 		//  Get the map that contains a List per synset type
-		Map subMap = (Map)(wordCategories.get(wordForm));
-		//  If there isn't already one, load them now
-		if (subMap == null)
-		{
-			subMap = loadSynsets(wordForm);
-			wordCategories.put(wordForm, subMap);
-			cache.put(wordForm, wordForm);
-		}
-		//  Get the synsets for this type
-		List typeList = (List)(subMap.get(type));
-		//  If there are some, add them to the list
-		if (typeList != null)
-		{
-			//  Find out how many there are
-			count = typeList.size();
-			//  Loop through list of synsets
-			for (int j = 0; j < count; j++)
+		TreeMap<SynsetType, ArrayList<Synset>> subMap = wordCategories.get(wordForm);
+		
+		if (subMap != null) {
+			//  Get the synsets for this type
+			ArrayList<Synset> typeList = subMap.get(type);
+			//  If there are some, add them to the list
+			if (typeList != null)
 			{
-				//  Add each one to the list if it isn't already there
-				if (!synsetList.contains(typeList.get(j)))
+				//  Find out how many there are
+				count = typeList.size();
+				//  Loop through list of synsets
+				for (int j = 0; j < count; j++)
 				{
-					synsetList.add(typeList.get(j));
+					//  Add each one to the list if it isn't already there
+					if (!synsetList.contains(typeList.get(j)))
+					{
+						synsetList.add(typeList.get(j));
+					}
 				}
 			}
 		}
@@ -240,48 +216,78 @@ public class WordFormLookup
 		synsetList.toArray(synsetArray);
 		return synsetArray;
 	}
+	
+	private class SynsetComparator implements Comparator<Synset> {
+		
+		String wordForm = "";
+		
+		void setComparisonWordForm(String wordForm) {
+			this.wordForm = wordForm;
+		}
+
+		@Override
+		public int compare(Synset o1, Synset o2) {
+			return ((ReferenceSynset)o1).compareSenseIndex(wordForm, (ReferenceSynset)o2);
+		}
+		
+	}
 
 	/**
-	 * Loads from the database all synsets from the database that contain a
-	 * particular word form.
-	 *
-	 * @param  wordForm Word form for which to return synsets.
-	 * @return Newly created map containing the synset entries for the word.
+	 * Loads from the database all synsets in the database.
 	 */
-	private Map loadSynsets(String wordForm) throws WordNetException
-	{
-		Synset synset;
-		SynsetType type;
-		List categoryList;
-
-		//  Create a new entry for the word form in the map
-		Map subMap = new TreeMap();
-		//  Read lines from the sense index that correspond to the word form
+	private void loadAllSynsets() {
+		
 		SenseIndexReader reader = SenseIndexReader.getInstance();
-		SenseIndexEntry[] indexEntries = reader.getLemmaEntries(wordForm);
-		Arrays.sort(indexEntries);
-
 		SynsetFactory factory = SynsetFactory.getInstance();
-		//  Loop through the list of index entries
-		for (int i = 0; i < indexEntries.length; i++)
-		{
-			synset = factory.getSynset(indexEntries[i].getSynsetPointer());
-			type = synset.getType();
-			((ReferenceSynset)synset).setSenseNumber(indexEntries[i].getSenseNumber());
-			//  Also add the new synset to our cache
-			categoryList = (List)(subMap.get(type));
+		
+		//Loop through all entries in index.
+		Iterator<SenseIndexEntry> iterator = reader.getSenseIndexEntryIterator();
+		SynsetComparator comparator = new SynsetComparator();
+		while (iterator.hasNext()) {
+			SenseIndexEntry entry = iterator.next();
+			String wordForm = entry.getSenseKey().getLemma();
+			
+			//  Get the map that contains a List per synset type
+			TreeMap<SynsetType, ArrayList<Synset>> subMap = wordCategories.get(wordForm);
+			if (subMap == null) {
+				//  Create a new entry for the word form in the map
+				subMap = new TreeMap<SynsetType, ArrayList<Synset>>();
+				wordCategories.put(wordForm, subMap);
+			}
+			
+			// Get a synset for this entry
+			Synset synset = factory.getSynset(entry.getSynsetPointer());
+			SynsetType type = synset.getType();
+			
+			ReferenceSynset refSynset = (ReferenceSynset) synset;
+			
+			refSynset.populateRelationships();
+			
+			// Set the tag count. Even if the synset already existed, this is a new synonym.
+			// This must be set AFTER the test if isPopulated.
+			refSynset.setTagCount(wordForm, entry.getTagCount());
+			
+			
+			//  Also add the new synset to our list
+			ArrayList<Synset> categoryList = subMap.get(type);
 			//  If this is the first one, create a new list and store it
 			if (categoryList == null)
 			{
-				categoryList = new ArrayList();
+				categoryList = new ArrayList<Synset>();
 				subMap.put(type, categoryList);
+				categoryList.add(synset);
 			}
-			//  Add current synset to the list for its type
-			categoryList.add(synset);
+			else {
+				//  Add current synset to the list for its type if it is not there.
+				categoryList.add(synset);
+				comparator.setComparisonWordForm(wordForm);
+				Collections.sort(categoryList, comparator);
+			}
 		}
-		return subMap;
+		
 	}
 
+	
 	/**
 	 * Returns lemma representing word forms that <u>might</u> be present
 	 * in WordNet. For example, if "geese" is passed to this method (along

@@ -100,7 +100,7 @@ public class DetachmentRules
 	/**
 	 * Singleton instance of this class.
 	 */
-	private static DetachmentRules instance;
+	private static final DetachmentRules instance = new DetachmentRules();
 
 	/**
 	 * Static initializer that populates the type / rules map.
@@ -119,12 +119,8 @@ public class DetachmentRules
 	 * 
 	 * @return Reference to the singleton instance of this class.
 	 */
-	public synchronized static DetachmentRules getInstance()
+	public static DetachmentRules getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new DetachmentRules();
-		}
 		return instance;
 	}
 

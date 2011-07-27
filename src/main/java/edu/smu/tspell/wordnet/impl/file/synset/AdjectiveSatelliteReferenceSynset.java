@@ -24,6 +24,8 @@
  */
 package edu.smu.tspell.wordnet.impl.file.synset;
 
+import java.util.ArrayList;
+
 import edu.smu.tspell.wordnet.AdjectiveSynset;
 import edu.smu.tspell.wordnet.AdjectiveSatelliteSynset;
 import edu.smu.tspell.wordnet.Synset;
@@ -80,13 +82,46 @@ public class AdjectiveSatelliteReferenceSynset extends AdjectiveReferenceSynset
 	 * @return Reference to the head synset.
 	 * @throws WordNetException An error occurred retrieving data.
 	 */
-	public synchronized AdjectiveSynset getHeadSynset() throws WordNetException
+	public AdjectiveSynset getHeadSynset() throws WordNetException
 	{
 		if (headSynset == null)
 		{
 			headSynset = retrieveHeadSynset();
 		}
 		return headSynset;
+	}
+
+	/**
+	 * Returns the entry from the sense index file that corresponds to a
+	 * word sense in this synset.
+	 * <br><p>
+	 * Because we don't have the full sense key when we build the entries
+	 * in this synset (we only have what's in the pos.data file for the
+	 * synset), we'll need to check this synset's offset / pointer value
+	 * with each one that's stored in the index entries. That's necessary
+	 * because there can be multiple index entries that vary only by their
+	 * head word information, and since we don't have the head word
+	 * information we'll need to make sure that the index entry is associated
+	 * with this synset by comparing offset values.
+	 * 
+	 * @param  senseKey Sense key for which to return the sense index entry.
+	 * @return Index entry for this synset's word sense.
+	 */
+	protected SenseIndexEntry getIndexEntry(SenseKey senseKey)
+	{
+		SenseIndexEntry match = null;
+
+		SenseIndexReader reader = SenseIndexReader.getInstance();
+		ArrayList<SenseIndexEntry> entries = reader.getAllEntries(senseKey.getPartialSenseKeyText());
+		for (SenseIndexEntry entry: entries)
+		{
+			if (entry.getSynsetOffset() == this.getOffset())
+			{
+				match = entry;
+				break;
+			}
+		}
+		return match;
 	}
 
 	/**
@@ -149,5 +184,18 @@ public class AdjectiveSatelliteReferenceSynset extends AdjectiveReferenceSynset
 	public boolean isHeadSynset() throws WordNetException
 	{
 		return false;
+	}
+	
+	/**
+	 * Populate all the semantic and lexical relationships.
+	 * 
+	 */
+	protected String [] populateRelationships() {
+		// Populate the lexical relationships
+		String [] wordForms = super.populateRelationships();
+		
+		getHeadSynset();
+		
+		return wordForms;
 	}
 }

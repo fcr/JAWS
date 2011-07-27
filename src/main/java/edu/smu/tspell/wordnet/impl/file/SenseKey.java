@@ -31,7 +31,7 @@ import edu.smu.tspell.wordnet.SynsetType;
  * 
  * @author Brett Spell
  */
-public class SenseKey implements Comparable
+public class SenseKey implements Comparable<SenseKey>
 {
 
 	/**
@@ -162,12 +162,12 @@ public class SenseKey implements Comparable
 	 *         than, equal to, or greater than the reference object,
 	 *         respectively.
 	 */
-	public int compareTo(Object o)
+	public int compareTo(SenseKey o)
 	{
 		int relativeValue = 1;
 		if (o != null)
 		{
-			SenseKey target = (SenseKey)o;
+			SenseKey target = o;
 			relativeValue = getType().compareTo(target.getType());
 			if (relativeValue == 0)
 			{

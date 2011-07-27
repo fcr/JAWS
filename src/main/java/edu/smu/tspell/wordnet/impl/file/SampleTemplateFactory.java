@@ -55,19 +55,15 @@ public class SampleTemplateFactory extends SampleSentenceData
 	/**
 	 * Singleton instance of this class.
 	 */
-	private static SampleTemplateFactory instance;
+	private static final SampleTemplateFactory instance = new SampleTemplateFactory();
 
 	/**
 	 * Returns a reference to the singleton instance of this class.
 	 * 
 	 * @return Reference to the singleton instance of this class.
 	 */
-	public static synchronized SampleTemplateFactory getInstance()
+	public static SampleTemplateFactory getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new SampleTemplateFactory();
-		}
 		return instance;
 	}
 

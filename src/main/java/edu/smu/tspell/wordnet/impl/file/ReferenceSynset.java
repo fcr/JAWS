@@ -31,7 +31,6 @@ import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.VerbSynset;
 import edu.smu.tspell.wordnet.WordNetException;
 import edu.smu.tspell.wordnet.WordSense;
-
 import edu.smu.tspell.wordnet.impl.AbstractSynset;
 
 /**
@@ -86,11 +85,6 @@ public abstract class ReferenceSynset extends AbstractSynset
 	private int offset;
 
 	/**
-	 * A decimal integer indicating the sense number of the word, within the part of speech encoded in sense_key.
-	 */
-	private int senseNumber;
-
-	/**
 	 * Encapsulates the resolved relationships between this synset and others.
 	 */
 	private RelationshipReferences references = new RelationshipReferences();
@@ -115,7 +109,6 @@ public abstract class ReferenceSynset extends AbstractSynset
 		this.pointers = pointers;
 		this.lexicalFileNumber = lexicalFile;
 		this.offset = offset;
-		this.senseNumber = -1;
 
 		this.tagCounts = new int[senseKeys.length];
 		for (int i = 0; i < tagCounts.length; i++)
@@ -151,7 +144,7 @@ public abstract class ReferenceSynset extends AbstractSynset
 	 * @see    <a href="http://wordnet.princeton.edu/man/cntlist.5WN">Format
 	 *         of <i>cntlist</i> File.</a>
 	 */
-	public synchronized int getTagCount(String wordForm) throws WordNetException
+	public int getTagCount(String wordForm) throws WordNetException
 	{
 		int index = getWordIndex(
 				TextTranslator.translateToExternalFormat(wordForm));
@@ -169,33 +162,56 @@ public abstract class ReferenceSynset extends AbstractSynset
 	}
 	
 	/**
-	 * A decimal integer indicating the sense number of the word, within the 
-	 * part of speech encoded in sense_key, in the WordNet database.
-	 * 
-	 * @param the sense number
-	 */
-	void setSenseNumber(int senseNumber) {
-		this.senseNumber = senseNumber;
-	}
-
 	/**
-	 * A decimal integer indicating the sense number of the word, within the 
-	 * part of speech encoded in sense_key, in the WordNet database.
-	 * 
-	 * @return The sense number
+	 * Returns SynsetIndexEntry that corresponds to the reciever.
+	 *
+	 * @return Value that uniquely identifies a word sense.
+	 * @param  wordForm Word form for which to return the sense number.
+	 * @throws WordNetException The specified word form is not part of this
 	 */
-	public int getSenseNumber() {
-		if (senseNumber < 0)
+	private SenseIndexEntry getSenseIndexEntry(String wordForm) throws WordNetException
+	{
+		int index = getWordIndex(
+				TextTranslator.translateToExternalFormat(wordForm));
+		if (index < 0)
 		{
-			// Normally we should not need to get here.
-			synchronized (this) {
-				SenseIndexEntry entry = getIndexEntry(senseKeys[0]);
-				senseNumber = entry.getSenseNumber();
-			}
+			throw new WordNetException("Attempted to get the tag count for '" +
+					wordForm + "' from a synset that does not contain it.");
 		}
-		return senseNumber;
+		SenseIndexEntry entry = getIndexEntry(senseKeys[index]);
+		return entry;
 	}
-
+	
+	/**
+	 * Compare two synsets using information from the SenseIndex.
+	 * 
+	 * @param wordForm
+	 * @param o
+	 * @return
+	 */
+	public int compareSenseIndex(String wordForm, ReferenceSynset o) {
+		SenseIndexEntry thisEntry = getSenseIndexEntry(wordForm);
+		SenseIndexEntry thatEntry = o.getSenseIndexEntry(wordForm);
+		return thisEntry.compareTo(thatEntry);
+	}
+	
+	/**
+	 * Set a number that's intended to provide an approximation of how
+	 * frequently the specified word form is used to represent this meaning
+	 * relative to how often it's used to represent other meanings.
+	 * 
+	 * @param  wordForm Word form for which to return the tag count.
+	 * @param  tagCount - the tag count.
+	 * @return Number that's used to indicate an approximate frequency of use.
+	 * @see    <a href="http://wordnet.princeton.edu/man/cntlist.5WN">Format
+	 *         of <i>cntlist</i> File.</a>
+	 */
+	void setTagCount(String wordForm, int tagCount)
+	{
+		int index = getWordIndex(wordForm);
+		tagCounts[index] = tagCount;
+	}
+	
 	/**
 	 * Returns the index of the word form that matches the one specified.
 	 * 
@@ -277,7 +293,7 @@ public abstract class ReferenceSynset extends AbstractSynset
 	 * @return Synsets that have the specified relationship type.
 	 * @throws WordNetException An error occurred retrieving data.
 	 */
-	protected synchronized Synset[] getSynsets(RelationshipType type)
+	protected Synset[] getSynsets(RelationshipType type)
 			throws WordNetException
 	{
 		Synset[] synsets = (Synset[])(getReferences(type));
@@ -296,7 +312,7 @@ public abstract class ReferenceSynset extends AbstractSynset
 	 * @return Noun synsets that have the specified relationship type.
 	 * @throws WordNetException An error occurred retrieving data.
 	 */
-	protected synchronized NounSynset[] getNounSynsets(RelationshipType type)
+	protected NounSynset[] getNounSynsets(RelationshipType type)
 			throws WordNetException
 	{
 		NounSynset[] nounSynsets = (NounSynset[])(getReferences(type));
@@ -318,7 +334,7 @@ public abstract class ReferenceSynset extends AbstractSynset
 	 * @return Verb synsets that have the specified relationship type.
 	 * @throws WordNetException An error occurred retrieving data.
 	 */
-	protected synchronized VerbSynset[] getVerbSynsets(RelationshipType type)
+	protected VerbSynset[] getVerbSynsets(RelationshipType type)
 			throws WordNetException
 	{
 		VerbSynset[] verbSynsets = (VerbSynset[])(getReferences(type));
@@ -340,7 +356,7 @@ public abstract class ReferenceSynset extends AbstractSynset
 	 * @return Adjective synsets that have the specified relationship type.
 	 * @throws WordNetException An error occurred retrieving data.
 	 */
-	protected synchronized AdjectiveSynset[] getAdjectiveSynsets(
+	protected AdjectiveSynset[] getAdjectiveSynsets(
 			RelationshipType type) throws WordNetException
 	{
 		AdjectiveSynset[] nounSynsets =
@@ -524,7 +540,7 @@ public abstract class ReferenceSynset extends AbstractSynset
 	 *         form.
 	 * @throws WordNetException An error occurred retrieving data.
 	 */
-	protected synchronized WordSense[] getReferences(
+	protected WordSense[] getReferences(
 			RelationshipType type, String wordForm) throws WordNetException
 	{
 		Synset synset;
@@ -589,20 +605,9 @@ public abstract class ReferenceSynset extends AbstractSynset
 	 */
 	protected SenseIndexEntry getIndexEntry(SenseKey senseKey)
 	{
-		SenseIndexEntry match = null;
-
 		SenseIndexReader reader = SenseIndexReader.getInstance();
-		SenseIndexEntry[] entries = reader.getAllEntries(
-				senseKey.getPartialSenseKeyText());
-		for (int i = 0; i < entries.length; i++)
-		{
-			if (entries[i].getSynsetOffset() == this.getOffset())
-			{
-				match = entries[i];
-				break;
-			}
-		}
-		return match;
+		String key = senseKey.getFullSenseKeyText();
+		return reader.getEntry(key);
 	}
 
 	/**
@@ -655,4 +660,41 @@ public abstract class ReferenceSynset extends AbstractSynset
 		return buffer.toString();
 	}
 
+	/**
+	 * Answer if the receiver has been populated with 
+	 * lexical and semantic relations.
+	 * 
+	 * @return
+	 */
+	boolean isPopulated() {
+		for (int i = 0; i < tagCounts.length; i++) {
+			if (tagCounts[i] > 0) {
+				return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Populate all the semantic and lexical relationships.
+	 */
+	protected String [] populateRelationships() {
+		String [] wordForms = getWordForms();
+		
+		// Populate the lexical relationships
+		for (int i = 0; i < wordForms.length; i++) {
+			String wordForm = wordForms[i];
+			
+			getAntonyms(wordForm);
+			getDerivationallyRelatedForms(wordForm);
+		}
+		
+		// Populate the semantic relationships.
+		getRegions();
+		getTopics();
+		getUsages();
+		
+		return wordForms;
+	}
+	
 }

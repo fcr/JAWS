@@ -77,4 +77,18 @@ public class AdverbReferenceSynset extends ReferenceSynset
 		return getReferences(RelationshipType.PERTAINYM, wordForm);
 	}
 
+	/**
+	 * Populate all the semantic and lexical relationships.
+	 * 
+	 */
+	protected String [] populateRelationships() {
+		// Populate the lexical relationships
+		String [] wordForms = super.populateRelationships();
+		for (int i = 0; i < wordForms.length; i++) {
+			String wordForm = wordForms[i];
+			getPertainyms(wordForm);
+		}
+
+		return wordForms;
+	}
 }

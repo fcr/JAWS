@@ -52,6 +52,10 @@ public class TextTranslator
 	public static String translateToExternalFormat(String lemma)
 	{
 		int index;
+		
+		if (PropertyNames.nativeFormat) {
+			return translateToDatabaseFormat(lemma);
+		}
 
 		StringBuffer buffer = new StringBuffer(lemma);
 		index = buffer.indexOf(UNDERSCORE);

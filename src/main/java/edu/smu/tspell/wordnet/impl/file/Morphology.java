@@ -37,19 +37,15 @@ public class Morphology
 	/**
 	 * Singleton instance of this class.
 	 */
-	private static Morphology instance;
+	private static final Morphology instance = new Morphology();
 
 	/**
 	 * Returns a reference to the singleton instance of this class.
 	 * 
 	 * @return Reference to the singleton instance of this class.
 	 */
-	public static synchronized Morphology getInstance()
+	public static Morphology getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new Morphology();
-		}
 		return instance;
 	}
 
@@ -59,6 +55,9 @@ public class Morphology
 	 */
 	private Morphology()
 	{
+		// Force loading of the data
+		InflectionData.getInstance();
+		DetachmentRules.getInstance();
 	}
 
 	/**

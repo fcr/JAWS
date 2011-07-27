@@ -208,4 +208,25 @@ public class AdjectiveReferenceSynset extends ReferenceSynset
 		return true;
 	}
 
+	/**
+	 * Populate all the semantic and lexical relationships.
+	 * 
+	 */
+	protected String [] populateRelationships() {
+		// Populate the lexical relationships
+		String [] wordForms = super.populateRelationships();
+		for (int i = 0; i < wordForms.length; i++) {
+			String wordForm = wordForms[i];
+			getPertainyms(wordForm);
+			getParticiple(wordForm);
+		}
+
+		// Populate the semantic relationships.
+		getAttributes();
+		getRelatedConcepts();
+		getSimilar();
+		
+		return wordForms;
+	}
+	
 }

@@ -87,7 +87,7 @@ public class LineLocator extends RandomAccessReader {
 	 *         <code>null</code> if no such line exists.
 	 * @throws IOException An error occurred reading the file.
 	 */
-	protected synchronized String getLine(String prefix) throws IOException
+	protected String getLine(String prefix) throws IOException
 	{
 		long midpoint;
 		String rightHalf;
@@ -206,7 +206,7 @@ public class LineLocator extends RandomAccessReader {
 	 * @throws IOException An error occurred reading the file.
 	 * @see    #readToNextEndOfLine()
 	 */
-	protected synchronized String readToPriorEndOfLine(long position)
+	protected  String readToPriorEndOfLine(long position)
 			throws IOException
 	{
 		char priorChar;

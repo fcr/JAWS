@@ -24,15 +24,11 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
+import java.io.IOException;
+import java.util.HashMap;
+
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.WordNetException;
-
-import java.io.IOException;
-
-import java.lang.ref.WeakReference;
-
-import java.util.Map;
-import java.util.WeakHashMap;
 
 /**
  * Provides a central location from which synset instances can be retrieved.
@@ -50,19 +46,9 @@ public class SynsetFactory
 {
 
 	/**
-	 * Default number of synsets to cache.
-	 */
-	private final static int DEFAULT_CACHE_SIZE = 500;
-
-	/**
-	 * Number of synsets that will be cached.
-	 */
-	private static int cacheSize = DEFAULT_CACHE_SIZE;
-
-	/**
 	 * Singleton instance of this class.
 	 */
-	private static SynsetFactory instance;
+	private static final SynsetFactory instance = new SynsetFactory();
 
 	/**
 	 * Maps pointers to their corresponding synsets.
@@ -72,49 +58,17 @@ public class SynsetFactory
 	 * {@link Synset}.
 	 * 
 	 * @see #synsetPointers
-	 * @see #addToCache(Synset, SynsetPointer)
 	 * @see #getCachedSynset(SynsetPointer)
 	 */
-	private Map pointerSynsets = new WeakHashMap();
-
-	/**
-	 * Maps synsets to their corresponding pointers.
-	 * <br><p>
-	 * For each entry in the map, the key is an instance of {@link Synset}
-	 * and the corresponding value is an instance of {@link SynsetPointer}.
-	 * 
-	 * @see #pointerSynsets
-	 * @see #addToCache(Synset, SynsetPointer)
-	 * @see #getCachedSynset(SynsetPointer)
-	 */
-	private Map synsetPointers = new WeakHashMap();
-
-	/**
-	 * Maintains "strong" references to the synsets to ensure that they
-	 * don't get garbage collected.
-	 */
-	private LeastRecentlyUsedCache cache =
-			new LeastRecentlyUsedCache(cacheSize);
-
-	/**
-	 * Static initializer that updates the cache size if one was specified.
-	 */
-	static
-	{
-		cacheSize = PropertyNames.synsetCacheSize;
-	}
+	private HashMap<SynsetPointer,Synset> pointerSynsets = new HashMap<SynsetPointer,Synset>();
 
 	/**
 	 * Returns a reference to the singleton instance of this class.
 	 * 
 	 * @return Reference to the singleton instance of this class.
 	 */
-	public synchronized static SynsetFactory getInstance()
+	public static SynsetFactory getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new SynsetFactory();
-		}
 		return instance;
 	}
 
@@ -139,58 +93,16 @@ public class SynsetFactory
 	 * @throws WordNetException An error occurred reading or parsing the
 	 *         synset.
 	 */
-	public synchronized Synset getSynset(SynsetPointer pointer)
+	public Synset getSynset(SynsetPointer pointer)
 			throws WordNetException
 	{
-		Synset synset = getCachedSynset(pointer);
+		Synset synset = pointerSynsets.get(pointer);
 		if (synset == null)
 		{
 			synset = readSynset(pointer);
-			addToCache(synset, pointer);
-			cache.put(pointer, synset);
+			pointerSynsets.put(pointer, synset);
 		}
 		return synset;
-	}
-
-	/**
-	 * Attempts to return a synset that was previously stored in the cache.
-	 * 
-	 * @param  pointer Identifies the database location associated with the
-	 *         synset.
-	 * @return Previously cached synset object or <code>null</code> if it
-	 *         is not currently stored in the cache.
-	 * @see    #addToCache(Synset, SynsetPointer)
-	 */
-	private Synset getCachedSynset(SynsetPointer pointer)
-	{
-		WeakReference weakRef = (WeakReference)(pointerSynsets.get(pointer));
-		return (weakRef != null ? (Synset)(weakRef.get()) : null);
-	}
-
-	/**
-	 * Adds a synset to the cache.
-	 * <br><p>
-	 * We add the synset to two different instances of {@link WeakHashMap}
-	 * even though we only provide a lookup method using the one that has
-	 * pointers for its keys. The reason for doing this is that it has a
-	 * very desirable affect on caching and garbage collection. Specifically,
-	 * it ensures that we'll be able to retrieve a synset from the cache as
-	 * long as a normal (strong) reference exists to the synset. This works
-	 * because the non-lookup map has a weak reference to the synset as its
-	 * key and a strong reference to the pointer as the corresponding value.
-	 * As long as a strong reference exists to that synset its map entry
-	 * will remain intact, which in turn will cause the entry in the other
-	 * map (the one that maps pointers to synsets) to remain valid as well
-	 * due to the existance of the strong reference in the first map.
-	 * 
-	 * @param  synset Synset that's to be stored in the cache.
-	 * @param  pointer Identifies the location from which the synset was loaded.
-	 * @see    #getCachedSynset(SynsetPointer)
-	 */
-	private void addToCache(Synset synset, SynsetPointer pointer)
-	{
-		pointerSynsets.put(pointer, new WeakReference(synset));
-		synsetPointers.put(synset, pointer);
 	}
 
 	/**
@@ -208,8 +120,7 @@ public class SynsetFactory
 		String data = null;
 		try
 		{
-			SynsetReader reader = SynsetReader.getInstance(
-					pointer.getType());
+			SynsetReader reader = SynsetReader.getInstance(pointer.getType());
 			data = reader.readData(pointer);
 			SynsetParser parser = new SynsetParser();
 			synset = parser.createSynset(data);

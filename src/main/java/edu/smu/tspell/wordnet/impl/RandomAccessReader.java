@@ -87,6 +87,7 @@ public abstract class RandomAccessReader
 		}
 		accessor = ByteBuffer.wrap(buffer);
 		filePointer = accessor.position();
+		stream.close();
 	}
 
 
@@ -97,7 +98,7 @@ public abstract class RandomAccessReader
 	 * @param  newPosition New byte position within the file.
 	 * @throws IOException An error occurred updating the file pointer.
 	 */
-	protected synchronized void seek(long newPosition) throws IOException
+	protected void seek(long newPosition) throws IOException
 	{
 		if (newPosition != filePointer)
 		{
@@ -116,7 +117,7 @@ public abstract class RandomAccessReader
 	 *         delimiter or the end of the file was encountered.
 	 * @throws IOException An error occurred reading the file.
 	 */
-	protected synchronized String readToNextEndOfLine() throws IOException
+	protected String readToNextEndOfLine() throws IOException
 	{
 		char nextChar;
 
@@ -143,7 +144,7 @@ public abstract class RandomAccessReader
 	 * @throws IOException An error occurred reading the character.
 	 * @see    RandomAccessFile#read()
 	 */
-	protected synchronized char readNextCharacter() throws IOException
+	protected char readNextCharacter() throws IOException
 	{
 		char nextChar = (char)(-1);
 		if (filePointer < fileSize)

@@ -9,7 +9,6 @@ package edu.smu.tspell.wordnet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import java.io.DataInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
@@ -18,6 +17,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,22 +40,20 @@ public class WordNetConcurrencyTest {
 	 * Load the stop words needed by the tagger. Stop words are held in the
 	 * data/stoplist.txt
 	 */
-	@SuppressWarnings({ "deprecation" })
 	private  static List<String> loadWordList(String path) {
 		List<String> words = new ArrayList<String>();
-		DataInputStream br = null;
+		InputStream file = null;
 		try {
-			InputStream file = WordNetConcurrencyTest.class.getResourceAsStream(path);
+			file = WordNetConcurrencyTest.class.getResourceAsStream(path);
 			if (file == null) {
 				throw new IOException("Cannot open file: " + path);
 			}
-			br = new DataInputStream(file);
-
-			String eachLine = br.readLine();
-
-			while (eachLine != null) {
-				words.add(eachLine);
-				eachLine = br.readLine();
+			LineIterator iterator = IOUtils.lineIterator(file, null);
+			//  Loop through all lines in the file
+			while (iterator.hasNext())
+			{
+				String line = (String)iterator.next();
+				words.add(line);
 			}
 			return words;
 		} catch (FileNotFoundException e) {
@@ -65,8 +64,8 @@ public class WordNetConcurrencyTest {
 			fail(msg);
 		} finally {
 			try {
-				if (br != null) {
-					br.close();
+				if (file != null) {
+					file.close();
 				}
 			} catch (IOException e) {
 				// Do nothing

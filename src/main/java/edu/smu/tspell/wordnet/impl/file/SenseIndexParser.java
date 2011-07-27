@@ -68,8 +68,7 @@ public class SenseIndexParser
 		//  Tag count: number of times sense is tagged in semantic concordance
 		int tagCount = Integer.parseInt(tokenizer.nextToken());
 
-		return new SenseIndexEntry(
-				senseKey, synsetOffset, senseNumber, tagCount);
+		return new SenseIndexEntry(senseKey, synsetOffset, senseNumber, tagCount);
 	}
 
 }

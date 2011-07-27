@@ -24,18 +24,24 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
-import edu.smu.tspell.wordnet.impl.MultipleLineLocator;
-
 import java.io.IOException;
-
+import java.io.InputStream;
 import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+
+import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.LineIterator;
+
+import edu.smu.tspell.wordnet.SynsetType;
 
 /**
  * Locates entries in the <code>index.sense</code> file.
  * 
  * @author Brett Spell
  */
-public class SenseIndexReader extends MultipleLineLocator
+public class SenseIndexReader
 {
 
 	/**
@@ -44,20 +50,22 @@ public class SenseIndexReader extends MultipleLineLocator
 	private final static String SENSE_INDEX_FILE = "index.sense";
 
 	/**
-	 * Text that indicates the end of the lemma / word form at the beginning
-	 * of each line in the index file.
-	 */
-	private final static String LEMMA_TERMINATOR = "%";
-
-	/**
 	 * Reference to the singleton instance of this class.
 	 */
-	private static WeakReference reference;
+	private static WeakReference<SenseIndexReader> reference;
 
 	/**
 	 * Used to parse lines read from the sense index file.
 	 */
 	private SenseIndexParser parser = new SenseIndexParser();
+	
+	/**
+	 * Full cache of parsed Sense Index Entries.
+	 * Only needed until the Wordnet is fully loaded.
+	 */
+	private HashMap<String, SenseIndexEntry> entries = new HashMap<String, SenseIndexEntry> ();
+	
+	private HashMap<String, ArrayList<SenseIndexEntry>> satelliteEntries = new HashMap<String, ArrayList<SenseIndexEntry>> ();
 
 	/**
 	 * Returns a reference to the singleton instance of this class.
@@ -65,7 +73,7 @@ public class SenseIndexReader extends MultipleLineLocator
 	 * @return Singleton instance of this class.
 	 * @throws RetrievalException An error occurred opening the index file.
 	 */
-	public synchronized static SenseIndexReader getInstance()
+	public static SenseIndexReader getInstance()
 			throws RetrievalException
 	{
 		SenseIndexReader instance = null;
@@ -81,7 +89,7 @@ public class SenseIndexReader extends MultipleLineLocator
 			try
 			{
 				instance = new SenseIndexReader();
-				reference = new WeakReference(instance);
+				reference = new WeakReference<SenseIndexReader>(instance);
 			}
 			catch (IOException ioe)
 			{
@@ -93,12 +101,49 @@ public class SenseIndexReader extends MultipleLineLocator
 	}
 
 	/**
+	 * Reads the exceptions from a single file that correspond to the
+	 * exceptions for a particular synset type.
+	 * 
+	 * @param  fileName Name of the file to read.
+	 * @param  type Syntactic type associated with the file.
+	 * @throws RetrievalException An error occurred reading the exception data.
+	 */
+	private void loadSenseIndexEntries(String fileName) throws IOException
+	{
+		String dir = PropertyNames.databaseDirectory;
+		InputStream file = getClass().getResourceAsStream(dir + fileName);
+		LineIterator iterator = IOUtils.lineIterator(file, null);
+		//  Loop through all lines in the file
+		while (iterator.hasNext())
+		{
+			String line = (String)iterator.next();
+			//  Parse the index line
+			SenseIndexEntry entry = parser.parse(line);
+			String key = entry.getSenseKey().getFullSenseKeyText();
+			entries.put(key, entry);
+			
+			// Deal with any adjective satellites
+			if (entry.getSenseKey().getType() == SynsetType.ADJECTIVE_SATELLITE) {
+				key = entry.getSenseKey().getPartialSenseKeyText();
+				ArrayList<SenseIndexEntry> list = satelliteEntries.get(key);
+				if (list == null) {
+					// this is our first one for this key.
+					list = new ArrayList<SenseIndexEntry>();
+					satelliteEntries.put(key,  list);
+				}
+				list.add(entry);
+			}
+		}
+		file.close();
+	}
+
+	/**
 	 * This constructor ensures that instances of this class can't be
 	 * constructed by other classes.
 	 */
 	private SenseIndexReader() throws IOException
 	{
-		super(PropertyNames.databaseDirectory, SENSE_INDEX_FILE);
+		loadSenseIndexEntries(SENSE_INDEX_FILE);
 	}
 
 	/**
@@ -114,42 +159,31 @@ public class SenseIndexReader extends MultipleLineLocator
 	 */
 	public SenseIndexEntry getEntry(String prefix) throws RetrievalException
 	{
-		SenseIndexEntry[] entries = getAllEntries(prefix);
-		if (entries.length != 1)
-		{
-			throw new RetrievalException("Expected to find exactly one line " +
-					"that begins with '" + prefix + "' but found + " +
-					entries.length);
+		return entries.get(prefix);
+	}
+	
+	private class SenseIndexEntryIterator implements Iterator<SenseIndexEntry> {
+		
+		Iterator<SenseIndexEntry> it = entries.values().iterator();
+
+		@Override
+		public boolean hasNext() {
+			return it.hasNext();
 		}
-		return entries[0];
-	}
 
-	/**
-	 * Given a word form, returns all entries from the index file that begin
-	 * with the specified lemma text.
-	 * <br><p>
-	 * Note that before comparing the specified text to lines of the index
-	 * file, the lemma text will be converted to the appropriate format to
-	 * ensure that only lines in the file with that lemma are returned. In
-	 * other words, the specified text will be converted to all lower case
-	 * characters and appended with the lemma terminator ("%") character
-	 * before searching the index file for matching lines.
-	 * <br><p>
-	 * The method also allows the caller to specify a type code that will
-	 * (if specified) result in only entries of the specified synset type
-	 * being returned.
-	 * 
-	 * @param  lemma Lemma for which to return index file lines.
-	 * @return All entries that begin with the specified lemma.
-	 * @throws RetrievalException An error occurred reading the index file.
-	 */
-	public SenseIndexEntry[] getLemmaEntries(String lemma)
-			throws RetrievalException
-	{
-		return getAllEntries(TextTranslator.translateToDatabaseFormat(lemma) +
-				LEMMA_TERMINATOR);
-	}
+		@Override
+		public SenseIndexEntry next() {
+			return it.next();
+		}
 
+		@Override
+		public void remove() {
+			throw new UnsupportedOperationException();
+			
+		}
+		
+	}
+	
 	/**
 	 * Given a word form, returns all entries from the index file that begin
 	 * with the specified text. No modifications or additions are made to the
@@ -160,26 +194,20 @@ public class SenseIndexReader extends MultipleLineLocator
 	 * @return All entries that begin with the specified text.
 	 * @throws RetrievalException An error occurred reading the index file.
 	 */
-	public SenseIndexEntry[] getAllEntries(String prefix)
+	public ArrayList<SenseIndexEntry> getAllEntries(String prefix)
 			throws RetrievalException
 	{
-		SenseIndexEntry[] entries;
-		try
-		{
-			//  Get all index file lines associated with the word form
-			String[] lines = super.getLines(prefix);
-			entries = new SenseIndexEntry[lines.length];
-			for (int i = 0; i < entries.length; i++)
-			{
-				entries[i] = parser.parse(lines[i]);
-			}
-		}
-		catch (IOException ioe)
-		{
-			throw new RetrievalException(
-					"Error reading index file: " + ioe.getMessage(), ioe);
-		}
-		return entries;
+		ArrayList<SenseIndexEntry> list = satelliteEntries.get(prefix);
+		return list;
+	}
+
+	/**
+	 * Iterate over all entries in the SenseIndex.
+	 * 
+	 * @return Iterator
+	 */
+	public Iterator<SenseIndexEntry> getSenseIndexEntryIterator() {
+		return new SenseIndexEntryIterator();
 	}
 
 }

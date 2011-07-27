@@ -39,7 +39,7 @@ public abstract class WordNetDatabase
 	 * An instance of this class that can retrieve WordNet data from files
 	 * on the local file system.
 	 */
-	private static WordNetDatabase fileInstance;
+	private static final WordNetDatabase fileInstance = new FileDatabase();
 
 	/**
 	 * No-argument constructor.
@@ -142,12 +142,8 @@ public abstract class WordNetDatabase
 	 * @return Instance of this class that can be used to read the WordNet
 	 *         database stored on the local file system.
 	 */
-	public synchronized static WordNetDatabase getFileInstance()
+	public static WordNetDatabase getFileInstance()
 	{
-		if (fileInstance == null)
-		{
-			fileInstance = new FileDatabase();
-		}
 		return fileInstance;
 	}
 

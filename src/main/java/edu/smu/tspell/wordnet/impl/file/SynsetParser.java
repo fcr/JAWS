@@ -90,6 +90,10 @@ public class SynsetParser
 	public SynsetParser()
 	{
 		super();
+		// Force load of data
+		SampleFrameFactory.getInstance();
+		SampleIndexFactory.getInstance();
+		SampleTemplateFactory.getInstance();
 	}
 
 	/**
@@ -313,7 +317,7 @@ public class SynsetParser
 		String example;
 
 		String definition = null;
-		ArrayList exampleList = new ArrayList();
+		ArrayList<String> exampleList = new ArrayList<String>();
 		StringBuffer buffer = new StringBuffer(glossText.trim());
 		//  Do we have a gloss at all?
 		if (buffer.length() > 0)

@@ -77,7 +77,7 @@ public class InflectionData
 	/**
 	 * Singleton instance of this class.
 	 */
-	private static InflectionData instance;
+	private static final InflectionData instance = new InflectionData();
 
 	/**
 	 * Maps words to their inflected form(s). For each entry in this map,
@@ -93,12 +93,8 @@ public class InflectionData
 	 * 
 	 * @return Reference to the singleton instance of this class.
 	 */
-	public synchronized static InflectionData getInstance()
+	public static InflectionData getInstance()
 	{
-		if (instance == null)
-		{
-			instance = new InflectionData();
-		}
 		return instance;
 	}
 
