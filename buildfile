@@ -19,7 +19,7 @@ define "jaws" do
   
   download(artifact("junit4:junit4:jar:4.8.2")=> "https://github.com/downloads/KentBeck/junit/junit-4.8.2.jar")
   
-  compile.with 'commons-io:commons-io:jar:1.4'
+  compile.with 'commons-io:commons-io:jar:2.0.1'
   
   resources
   
