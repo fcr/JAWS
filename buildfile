@@ -5,7 +5,6 @@ require 'buildr-dependency-extensions'
 # Version number for this release
 VERSION_NUMBER = "1.3.1.#{ENV['BUILD_NUMBER'] || 'SNAPSHOT'}"
 # Group identifier for your projects
-GROUP = "edu.smu.tspell"
 COPYRIGHT = ""
 
 # Specify Maven 2.0 remote repositories here, like this:
@@ -17,7 +16,7 @@ define "jaws" do
 
   ENV['JAVA_OPTS'] ||= '-Xmx1g'
   project.version = VERSION_NUMBER
-  project.group = "edu.smu.tspell"
+  project.group = "fcr"
   manifest["Implementation-Vendor"] = COPYRIGHT
   
   download(artifact("junit4:junit4:jar:4.8.2")=> "https://github.com/downloads/KentBeck/junit/junit-4.8.2.jar")
