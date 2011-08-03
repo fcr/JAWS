@@ -25,6 +25,7 @@
 package edu.smu.tspell.wordnet.impl.file;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -96,6 +97,28 @@ public class WordFormLookup
 	}
 
 	/**
+	 * Check if each candidate form exists in Wordnet and if not already added to synsetList.
+	 * 
+	 * @param type
+	 * @param candidates
+	 * @param synsetList
+	 * @return if a candidate was added
+	 */
+	private void filterCandidates(SynsetType type, List<String> candidates, List<Synset> synsetList) {
+		Synset[] synsetArray;
+		for (String wordForm : candidates) {
+			// Get synsets for the candidate and loop through them
+			synsetArray = getSynsets(wordForm, type);
+			for (int k = 0; k < synsetArray.length; k++) {
+				// Add (non-duplicate) synsets to the list
+				if (!synsetList.contains(synsetArray[k])) {
+					synsetList.add(synsetArray[k]);
+				}
+			}
+		}
+	}
+
+	/**
 	 * Returns only the synsets of the specified types (e.g., noun) that
 	 * contain a word form matching the specified text and / or possibly
 	 * synsets that contain one of that word form's variants. The caller
@@ -129,7 +152,7 @@ public class WordFormLookup
 			throws WordNetException
 	{
 		Synset[] synsetArray;
-		String[] candidates;
+		List<String> candidates;
 		
 		String wordForm = TextTranslator.translateToDatabaseFormat(externalWordForm);
 
@@ -139,31 +162,31 @@ public class WordFormLookup
 		for (int i = 0; i < types.length; i++)
 		{
 			//  Get all synsets for the current type
-			synsetArray = getSynsets(wordForm, types[i]);
-			for (int j = 0; j < synsetArray.length; j++)
-			{
-				//  Add (non-duplicate) synsets to the list
-				if (!synsetList.contains(synsetArray[j]))
-				{
-					synsetList.add(synsetArray[j]);
-				}
-			}
+			candidates = Arrays.asList(wordForm);
+			filterCandidates(types[i], candidates, synsetList);
 			//  Does caller also want synsets containing base form candidates?
 			if (useMorphology)
 			{
 				//  Find possible base forms and loop through each one
-				candidates = getBaseFormCandidates(wordForm, types[i]);
-				for (int j = 0; j < candidates.length; j++)
-				{
-					//  Get synsets for the candidate and loop through them
-					synsetArray = getSynsets(candidates[j], types[i]);
-					for (int k = 0; k < synsetArray.length; k++)
-					{
-						//  Add (non-duplicate) synsets to the list
-						if (!synsetList.contains(synsetArray[k]))
-						{
-							synsetList.add(synsetArray[k]);
+		        // 0. Check the exception lists
+				candidates = getExceptionCandidates(wordForm, types[i]);
+				if (candidates.size() > 0) {
+					filterCandidates(types[i], candidates, synsetList);
+				}
+				else {
+					// No exceptions so..
+			        // 1. Apply rules once to the input to get y1, y2, y3, etc.
+					candidates = getBaseFormCandidates(wordForm, types[i]);
+					filterCandidates(types[i], candidates, synsetList);
+			        // 2. Return all that are in the database (and the original too) otherwise...
+					while (candidates.size() > 0 && synsetList.size() == 0) {
+				        // 3. If there are no matches, keep applying rules until we find a match
+						ArrayList<String> newCandidates = new ArrayList<String>();
+						for (String candidate: candidates) {
+							newCandidates.addAll(getBaseFormCandidates(candidate, types[i]));
 						}
+						candidates = newCandidates;
+						filterCandidates(types[i], candidates, synsetList);
 					}
 				}
 			}
@@ -303,10 +326,25 @@ public class WordFormLookup
 	 * @return Root word(s) from which the inflection is derived.
 	 * @see    Morphology
 	 */
-	private String[] getBaseFormCandidates(String inflection, SynsetType type)
+	private List<String>  getExceptionCandidates(String inflection, SynsetType type)
 	{
 		Morphology morphology = Morphology.getInstance();
-		return morphology.getBaseFormCandidates(inflection, type);
+		return Arrays.asList(morphology.getExceptionCandidates(inflection, type));
+	}
+
+	/**
+	 * Returns lemma representing word forms that <u>might</u> be present
+	 * in WordNet..
+	 * 
+	 * @param  inflection Irregular inflection for which to return root words.
+	 * @param  type Syntactic type for which to perform the lookup.
+	 * @return Root word(s) from which the inflection is derived.
+	 * @see    Morphology
+	 */
+	private List<String>  getBaseFormCandidates(String inflection, SynsetType type)
+	{
+		Morphology morphology = Morphology.getInstance();
+		return Arrays.asList(morphology.getBaseFormCandidates(inflection, type));
 	}
 
 }

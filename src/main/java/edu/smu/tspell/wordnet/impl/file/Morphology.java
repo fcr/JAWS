@@ -70,19 +70,6 @@ public class Morphology
 	 * exception file but if none are found it attempts to apply the
 	 * applicable detachment rules and returns any derivative word forms.
 	 * <br><p>
-	 * Note that this method naively applies the WordNet morphology rules
-	 * to the word form specified, specifically by using the contents of
-	 * the appropriate exception file(s) and by applying the rules of
-	 * detachment, if any, that exist for the synset type. No attempt is
-	 * made to ensure that the values returned are stored in WordNet or
-	 * that they even represent valid words, which is why they're referred
-	 * to as base form "candidates". That is, they may or may not represent
-	 * a correct / valid base form and even a legitimate base form may not
-	 * be present in WordNet. For example, passing "superheroes" to this
-	 * method will cause it to return "superhero" (again assuming that noun
-	 * base forms are to be returned) but at least as of WordNet 3.0 there
-	 * is no entry for the word form "superhero" stored in the database.
-	 * <br><p>
 	 * In addition to returning valid words that aren't stored in the
 	 * database this method can also return candidates that aren't valid
 	 * words at all. For example, requesting the candidate verb forms for
@@ -100,19 +87,28 @@ public class Morphology
 	 * @see    <a href="http://wordnet.princeton.edu/man/morphy.7WN">
 	 *         WordNet morphological processing</a>
 	 */
-	public String[] getBaseFormCandidates(String inflection,
-			SynsetType type)
+	public String[] getBaseFormCandidates(String inflection, SynsetType type)
+	{
+		DetachmentRules rules = DetachmentRules.getInstance();
+		String[] detachments = rules.getCandidateForms(inflection, type);
+		return detachments;
+	}
+
+	/**
+	 * Provides access to morphology exception data. These represent "irregular
+	 * inflections" and their corresponding root word(s), such as "geese" which
+	 * is an inflected form of the root word "goose". This is useful because in
+	 * some cases (as in "geese") the inflected form is not stored in WordNet but
+	 * the root form is available.
+	 * @param inflection
+	 * @param type
+	 * @return
+	 */
+	public String[] getExceptionCandidates(String inflection, SynsetType type)
 	{
 		InflectionData inflections = InflectionData.getInstance();
 		String[] exceptions = inflections.getBaseForms(inflection, type);
-		DetachmentRules rules = DetachmentRules.getInstance();
-		String[] detachments = rules.getCandidateForms(inflection, type);
-		String[] candidates =
-				new String[exceptions.length + detachments.length];
-		System.arraycopy(exceptions, 0, candidates, 0, exceptions.length);
-		System.arraycopy(detachments, 0,
-				candidates, exceptions.length, detachments.length);
-		return candidates;
+		return exceptions;
 	}
 
 }

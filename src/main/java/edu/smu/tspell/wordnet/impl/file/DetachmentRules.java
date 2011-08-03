@@ -46,6 +46,7 @@ public class DetachmentRules
 	{
 			new RuleOfDetachment("s", ""),
 			new RuleOfDetachment("ses", "s"),
+			new RuleOfDetachment("ves", "f"),
 			new RuleOfDetachment("xes", "x"),
 			new RuleOfDetachment("zes", "z"),
 			new RuleOfDetachment("ches", "ch"),
