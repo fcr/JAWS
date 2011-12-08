@@ -76,6 +76,10 @@ public class TextTranslator
 	 */
 	public static String translateToDatabaseFormat(String lemma)
 	{
+		if (PropertyNames.singleWordQueries) {
+			return lemma.toLowerCase();
+		}
+		
 		int index;
 
 		StringBuffer buffer = new StringBuffer(lemma.toLowerCase());

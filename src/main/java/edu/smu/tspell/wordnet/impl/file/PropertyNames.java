@@ -48,6 +48,12 @@ public class PropertyNames
 	private final static String WORD_FORMAT = "wordnet.database.nativeFormat";
 	public final static boolean nativeFormat;
 
+	/**
+	 * If true asume that all queries will be single words.
+	 */
+	private final static String SINGLE_WORD_QUERIES = "wordnet.database.singleWordQueries";
+	public final static boolean singleWordQueries;
+
 	static {
 		Properties props = new Properties();
 		String propertyValue = "";
@@ -61,6 +67,8 @@ public class PropertyNames
 			databaseDirectory = propertyValue;
 			propertyValue = props.getProperty(WORD_FORMAT);
 			nativeFormat = propertyValue.toLowerCase().equals("true");
+			propertyValue = props.getProperty(SINGLE_WORD_QUERIES);
+			singleWordQueries = propertyValue.toLowerCase().equals("true");
 			input.close();
 		}
 		// catch exception in case properties file does not exist

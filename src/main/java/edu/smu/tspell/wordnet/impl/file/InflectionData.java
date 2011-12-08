@@ -192,7 +192,7 @@ public class InflectionData
 	private void putMorphology(String inflection, String[] baseForms,
 			SynsetType type)
 	{
-		Map subMap = getSubMap(inflection, true);
+		Map subMap = getSubMap(inflection.toLowerCase(), true);
 		subMap.put(type, baseForms);
 	}
 
@@ -230,7 +230,7 @@ public class InflectionData
 	 */
 	private Map getSubMap(String inflection, boolean shouldCreate)
 	{
-		String wordForm = inflection.toLowerCase();
+		String wordForm = inflection; // Already in lower case .toLowerCase();
 		Map subMap = (Map)(inflectionMaps.get(wordForm));
 		if ((subMap == null) && (shouldCreate))
 		{
