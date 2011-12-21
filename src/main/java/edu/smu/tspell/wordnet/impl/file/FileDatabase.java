@@ -24,6 +24,8 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
+import java.util.Set;
+
 import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
 import edu.smu.tspell.wordnet.WordNetDatabase;
@@ -104,4 +106,13 @@ public class FileDatabase extends WordNetDatabase
 		return morphology.getBaseFormCandidates(inflection, type);
 	}
 
+	/**
+	 * Returns a set of all word forms that are in the WordNet.
+	 * 
+	 * @return a set of word forms
+	 */
+	public Set<String> allWordForms() {
+		WordFormLookup factory = WordFormLookup.getInstance();
+		return factory.allWordForms();
+	}
 }

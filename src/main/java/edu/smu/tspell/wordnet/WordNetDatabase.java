@@ -24,6 +24,8 @@
  */
 package edu.smu.tspell.wordnet;
 
+import java.util.Set;
+
 import edu.smu.tspell.wordnet.impl.file.FileDatabase;
 
 /**
@@ -147,4 +149,10 @@ public abstract class WordNetDatabase
 		return fileInstance;
 	}
 
+	/**
+	 * Returns a set of all word forms that are in the WordNet.
+	 * 
+	 * @return a set of word forms
+	 */
+	public abstract Set<String> allWordForms();
 }

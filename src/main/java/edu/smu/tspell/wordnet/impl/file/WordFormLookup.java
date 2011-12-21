@@ -31,6 +31,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Logger;
 
@@ -347,4 +348,12 @@ public class WordFormLookup
 		return Arrays.asList(morphology.getBaseFormCandidates(inflection, type));
 	}
 
+	/**
+	 * Returns a set of all word forms that are in the WordNet.
+	 * 
+	 * @return a set of word forms
+	 */
+	public Set<String> allWordForms() {
+		return wordCategories.keySet();
+	}
 }
