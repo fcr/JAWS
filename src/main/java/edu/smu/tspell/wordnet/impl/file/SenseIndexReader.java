@@ -93,7 +93,7 @@ public class SenseIndexReader
 		//  Loop through all lines in the file
 		while (iterator.hasNext())
 		{
-			String line = (String)iterator.next();
+			String line = iterator.nextLine();
 			//  Parse the index line
 			SenseIndexEntry entry = parser.parse(line);
 			String key = entry.getSenseKey().getFullSenseKeyText();

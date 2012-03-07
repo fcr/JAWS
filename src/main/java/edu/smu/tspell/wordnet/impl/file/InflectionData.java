@@ -163,7 +163,7 @@ public class InflectionData
 		//  Loop through all lines in the file
 		while (iterator.hasNext())
 		{
-			String line = (String)iterator.next();
+			String line = iterator.nextLine();
 			//  Parse the inflected word
 			tokenizer = new StringTokenizer(line, WORD_DELIMITER);
 			inflection = TextTranslator.translateToExternalFormat(

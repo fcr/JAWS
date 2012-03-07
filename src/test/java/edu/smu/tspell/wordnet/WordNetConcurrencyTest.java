@@ -52,7 +52,7 @@ public class WordNetConcurrencyTest {
 			//  Loop through all lines in the file
 			while (iterator.hasNext())
 			{
-				String line = (String)iterator.next();
+				String line = iterator.nextLine();
 				words.add(line);
 			}
 			return words;

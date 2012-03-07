@@ -215,7 +215,7 @@ public abstract class SampleSentenceData
 		//  Loop through all lines in the file
 		while (iterator.hasNext())
 		{
-			String line = (String)iterator.next();
+			String line = iterator.nextLine();
 			//  Find out where the key ends
 			index = line.indexOf(KEY_TERMINATOR);
 			//  Get the key and value
