@@ -115,4 +115,16 @@ public class FileDatabase extends WordNetDatabase
 		WordFormLookup factory = WordFormLookup.getInstance();
 		return factory.allWordForms();
 	}
+	
+	/**
+	 * Return the synset associated with the sense key.
+	 * 
+	 * @param senseKey
+	 * @return
+	 */
+	public Synset getSynsetWithSenseKey(String senseKey) {
+		WordFormLookup factory = WordFormLookup.getInstance();
+		return factory.getSynsetWithSenseKey(senseKey);
+	}
+
 }

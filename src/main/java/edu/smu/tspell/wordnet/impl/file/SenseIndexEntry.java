@@ -24,6 +24,8 @@
  */
 package edu.smu.tspell.wordnet.impl.file;
 
+import edu.smu.tspell.wordnet.Synset;
+
 /**
  * Represents a line / entry from the <code>sense.index</code> file.
  *
@@ -63,6 +65,27 @@ public class SenseIndexEntry implements Comparable<SenseIndexEntry>
 	 */
 	private int tagCount;
 	
+	/**
+	 * The cached synset, if already accessed, that is associated with this sense
+	 */
+	private Synset synset;
+	
+	/**
+	 * @return the cached synset
+	 */
+	protected Synset getSynset() {
+		return synset;
+	}
+
+
+	/**
+	 * @param synset the synset to set
+	 */
+	protected void setSynset(Synset synset) {
+		this.synset = synset;
+	}
+
+
 	/**
 	 * Constructor that accepts various properties that are part of this class.
 	 *

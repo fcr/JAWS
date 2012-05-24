@@ -118,5 +118,11 @@ public class WordNetDatabaseTest {
 		assertEquals("national_capital", sense);
 	}
 	
+	@Test
+	public void testSenseKey () {
+		Synset synsetBySense = wn.getSynsetWithSenseKey("dog%1:05:00::");
+		Synset dog = wn.getSynsets("dog")[0];
+		assertEquals(dog, synsetBySense);
+	}
 
 }

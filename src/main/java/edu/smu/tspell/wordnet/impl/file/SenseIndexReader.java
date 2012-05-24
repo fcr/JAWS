@@ -33,6 +33,7 @@ import java.util.Iterator;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.LineIterator;
 
+import edu.smu.tspell.wordnet.Synset;
 import edu.smu.tspell.wordnet.SynsetType;
 
 /**
@@ -189,6 +190,20 @@ public class SenseIndexReader
 	 */
 	public Iterator<SenseIndexEntry> getSenseIndexEntryIterator() {
 		return new SenseIndexEntryIterator();
+	}
+	
+	/**
+	 * Return any cached synset associated with the sense key.
+	 * 
+	 * @param senseKey
+	 * @return
+	 */
+	protected Synset getFromSenseKey(String senseKey) {
+		SenseIndexEntry entry = entries.get(senseKey);
+		if (entry != null) {
+			return entry.getSynset();
+		}
+		return null;
 	}
 
 }

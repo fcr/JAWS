@@ -155,4 +155,14 @@ public abstract class WordNetDatabase
 	 * @return a set of word forms
 	 */
 	public abstract Set<String> allWordForms();
+	
+	
+	/**
+	 * Return the synset associated with the sense key.
+	 * 
+	 * @param senseKey
+	 * @return
+	 */
+	public abstract Synset getSynsetWithSenseKey(String senseKey);
+
 }

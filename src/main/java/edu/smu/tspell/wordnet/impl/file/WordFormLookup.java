@@ -97,6 +97,9 @@ public class WordFormLookup
 		logger.info("Finished loading WordNet data to memory in " + (endTime - startTime)/1000 + " seconds");
 	}
 
+	private SenseIndexReader reader;
+	
+	
 	/**
 	 * Check if each candidate form exists in Wordnet and if not already added to synsetList.
 	 * 
@@ -264,7 +267,7 @@ public class WordFormLookup
 	 */
 	private void loadAllSynsets() {
 		
-		SenseIndexReader reader = SenseIndexReader.getInstance();
+		reader = SenseIndexReader.getInstance();
 		SynsetFactory factory = SynsetFactory.getInstance();
 		
 		//Loop through all entries in index.
@@ -285,6 +288,9 @@ public class WordFormLookup
 			// Get a synset for this entry
 			Synset synset = factory.getSynset(entry.getSynsetPointer());
 			SynsetType type = synset.getType();
+			
+			// Cache the synset with its sense.
+			entry.setSynset(synset);
 			
 			ReferenceSynset refSynset = (ReferenceSynset) synset;
 			
@@ -356,4 +362,15 @@ public class WordFormLookup
 	public Set<String> allWordForms() {
 		return wordCategories.keySet();
 	}
+	
+	/**
+	 * Return the synset associated with the sense key.
+	 * 
+	 * @param senseKey
+	 * @return
+	 */
+	public Synset getSynsetWithSenseKey(String senseKey) {
+		return reader.getFromSenseKey(senseKey);
+	}
+
 }
