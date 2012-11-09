@@ -588,6 +588,16 @@ public abstract class ReferenceSynset extends AbstractSynset
 	}
 
 	/**
+	 * Returns the sense key that corresponds to the word.
+	 * 
+	 * @return Sense key associated with the word.
+	 */
+	public String getSenseKey()
+	{
+		return senseKeys[0].toString();
+	}
+
+	/**
 	 * Returns the entry from the sense index file that corresponds to a
 	 * word sense in this synset.
 	 * <br><p>

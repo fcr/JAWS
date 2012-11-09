@@ -24,6 +24,7 @@
  */
 package edu.smu.tspell.wordnet;
 
+
 /**
  * A collection of one or more words and phrases ("collocations") collectively
  * referred to as "word forms" that can all share the same meaning.
@@ -125,4 +126,10 @@ public interface Synset
 	 */
 	public String[] getUsageExamples();
 	
+	/**
+	 * Returns the sense key that corresponds to the word.
+	 * 
+	 * @return Sense key associated with the word.
+	 */
+	public String getSenseKey();
 }
