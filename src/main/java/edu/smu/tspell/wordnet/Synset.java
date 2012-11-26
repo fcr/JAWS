@@ -127,9 +127,10 @@ public interface Synset
 	public String[] getUsageExamples();
 	
 	/**
-	 * Returns the sense key that corresponds to the word.
+	 * Returns the sense keys (lemma) that corresponds to the word.
 	 * 
 	 * @return Sense key associated with the word.
 	 */
-	public String getSenseKey();
+	public String [] getSenseKeys();
+	
 }

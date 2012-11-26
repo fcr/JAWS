@@ -55,6 +55,18 @@ import edu.smu.tspell.wordnet.impl.AbstractSynset;
  * 
  * @author Brett Spell
  */
+/**
+ * @author fcr
+ *
+ */
+/**
+ * @author fcr
+ *
+ */
+/**
+ * @author fcr
+ *
+ */
 public abstract class ReferenceSynset extends AbstractSynset
 {
 
@@ -587,14 +599,18 @@ public abstract class ReferenceSynset extends AbstractSynset
 		return senseKeys[wordIndex];
 	}
 
-	/**
-	 * Returns the sense key that corresponds to the word.
-	 * 
-	 * @return Sense key associated with the word.
+	/* (non-Javadoc)
+	 * @see edu.smu.tspell.wordnet.Synset#getSenseKeys()
 	 */
-	public String getSenseKey()
+	@Override
+	public String [] getSenseKeys()
 	{
-		return senseKeys[0].toString();
+		String [] keys = new String [senseKeys.length];
+		for (int i = 0; i < senseKeys.length; i++) {
+			SenseKey senseKey = senseKeys[i];
+			keys[i] = senseKey.toString();
+		}
+		return keys;
 	}
 
 	/**

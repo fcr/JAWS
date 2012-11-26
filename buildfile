@@ -3,7 +3,7 @@ require "bundler/setup"
 require 'buildr-dependency-extensions'
 
 # Version number for this release
-VERSION_NUMBER = "1.3.2.#{ENV['BUILD_NUMBER'] || 'SNAPSHOT'}"
+VERSION_NUMBER = "1.3.3.#{ENV['BUILD_NUMBER'] || 'SNAPSHOT'}"
 # Group identifier for your projects
 COPYRIGHT = ""
 
